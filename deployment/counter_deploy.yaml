@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: counter
+spec:
+  containers:
+  - name: count
+    image: busybox
+    args: [/bin/sh, -c,
+            'printf "#!/bin/sh\necho 123" > aa.sh && chmod +x aa.sh && ./aa.sh']
+

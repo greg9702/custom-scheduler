@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foobar
+  namespace: kube-system
+  labels:
+    app: foobar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foobar
+  template:
+    metadata:
+      labels:
+        app: foobar
+    spec:
+      containers:
+        - name: foobar
+          image: rand_sched:0.6
+          imagePullPolicy: Never
+      nodeSelector:
+        kubernetes.io/hostname: kind-control-plane
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          effect: "NoSchedule"
+          operator: "Exists"

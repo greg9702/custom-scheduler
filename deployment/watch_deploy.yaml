@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watch
+  labels:
+    app: watch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watch
+  template:
+    metadata:
+      labels:
+        app: watch
+    spec:
+      containers:
+        - name: watch
+          image: watcher:0.3
+          imagePullPolicy: Never
