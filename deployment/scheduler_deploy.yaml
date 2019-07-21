@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: foobar
-          image: rand_sched:0.6
+          image: rand_sched:0.7
           imagePullPolicy: Never
       nodeSelector:
         kubernetes.io/hostname: kind-control-plane

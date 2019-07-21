@@ -33,7 +33,7 @@ cp ~/.kube/kind-config-kind .
 ```
 In this file we have to use cluster _Internal IP_ - change line https://127.0.0.1:39505 <br>
 to https://XYZ:6443
-> where XYZ is master node Internal IP, get it with command `kubectl TODO`
+> where XYZ is master node Internal IP, get it with command `kubectl get nodes -o wide`
 
 - Build image and load it into cluster
 ```
@@ -54,13 +54,26 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-b
 ```
 
 To access the dashboard externally, create port binding using kind or make NodePort
+> https://github.com/kubernetes/dashboard/wiki/Accessing-Dashboard---1.7.X-and-above
+
+NodePort:
+
 ```
-https://github.com/kubernetes/dashboard/wiki/Accessing-Dashboard---1.7.X-and-above
+kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
 ```
+Change line `type: ClusterIP` to `type: NodePort`
+```
+kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+
+```
+There we get port on which dashboard is exposed
+To get to dashboard go to URL _https://<node-IP>:<node-Port>/#/login_
+_Node IP_ is the Internal IP of the node on which dashboard is deployed!
 
 To gain full access to dashboard create admin accoount
 ```
-kube create clusterrolebinding permissive-binding \
+kubectl create -n kube-system serviceaccount admin
+kubectl create clusterrolebinding permissive-binding \
  --clusterrole=cluster-admin \
  --user=admin \
  --user=kubelet \
