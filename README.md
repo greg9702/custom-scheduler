@@ -6,3 +6,4 @@
 [ ] make size of containters const				-<br>
 [ ] make it possible to develop easily				<br>
 [x] dashboard							<br>
+[ ] build my own image <br>

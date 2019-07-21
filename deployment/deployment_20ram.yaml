@@ -1,24 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-kubernetes
+  name: twentymb
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: hello-kubernetes
+      app: twentymb
   template:
     metadata:
       labels:
-        app: hello-kubernetes
+        app: twentymb
     spec:
+      schedulerName: foobar
       containers:
-      - name: hello-kubernetes
+      - name: twentymb
         image: paulbouwer/hello-kubernetes:1.5
-        ports:
-        - containerPort: 8080
         resources:
           requests:
-            memory: "100Mi"
+            memory: "m"
           limits:
-            memory: "100Mi"
+            memory: "10m"

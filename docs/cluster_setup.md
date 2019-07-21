@@ -1,4 +1,5 @@
-#### Step by step cluster setup
+#### export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+Step by step cluster setup
 
 <br>
 
