@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load
+  labels:
+    app: load
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load
+  template:
+    metadata:
+      labels:
+        app: load
+    spec:
+      containers:
+        - name: load
+          image: load:0.1
+          imagePullPolicy: Never
+          resources:
+            requests:
+              memory: "300Mi"
+            limits:
+              memory: "300Mi"

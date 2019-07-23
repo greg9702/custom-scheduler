@@ -8,6 +8,5 @@ nodes:
 # the three workers
 - role: worker
   image: kindest/node:v1.15.0
-  memory: 500m
 - role: worker
-  image: kindest/node_my:0.1
+  image: kindest/node:v1.15.0

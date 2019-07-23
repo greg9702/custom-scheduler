@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: hello-kubernetes
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       app: hello-kubernetes
@@ -19,6 +19,6 @@ spec:
         - containerPort: 8080
         resources:
           requests:
-            memory: "100Mi"
+            memory: "30M"
           limits:
-            memory: "100Mi"
+            memory: "30M"
