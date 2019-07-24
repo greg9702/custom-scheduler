@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: load
+  name: load2
   labels:
-    app: load
+    app: load2
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: load
+      app: load2
   template:
     metadata:
       labels:
-        app: load
+        app: load2
     spec:
       containers:
-        - name: load
+        - name: abc
           image: load:0.1
           imagePullPolicy: Never
-          resources:
-            requests:
-              memory: "300Mi"
-            limits:
-              memory: "300Mi"
+          # resources:
+            # requests:
+              # memory: "250Mi"
+            # # limits:
+            # #   memory: "3000Mi"

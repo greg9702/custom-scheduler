@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-kubernetes
+  name: hello-kubernetes-2
 spec:
-  replicas: 5
+  replicas: 80
   selector:
     matchLabels:
       app: hello-kubernetes
@@ -19,6 +19,6 @@ spec:
         - containerPort: 8080
         resources:
           requests:
-            memory: "30M"
-          limits:
-            memory: "30M"
+            memory: "30Mi"
+          # limits:
+          #   memory: "50M"
