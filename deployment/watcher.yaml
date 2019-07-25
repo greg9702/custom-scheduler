@@ -16,5 +16,5 @@ spec:
     spec:
       containers:
         - name: watch
-          image: watcher:0.13
+          image: watcher:9c52b66
           imagePullPolicy: Never

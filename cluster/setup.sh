@@ -20,6 +20,8 @@ else
     cluster_name="kind"
 fi
 
+echo $cluster_name > CLUSTERNAME
+
 if [ "$2" != "" ]; then
     echo "Passed to many arguments"
 	echo -e "usage:\n./setup.sh 'cluster name' "
@@ -36,7 +38,8 @@ if [ $create_dashboard == 1 ]; then
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
 
 	#we have to wait to assign ip address to this pod TODO do while loop
-	sleep 10
+	echo "Waiting for dashboard scheduling..."
+	sleep 20
 
 	# change dashboard type to NodePort
 	kubectl patch svc -n kubernetes-dashboard kubernetes-dashboard --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
