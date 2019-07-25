@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# perform commit before usage, get hash of commit using git log -1 --format=%h
+# perform commit before usage, get hash of commit 
 # script to deploy whole application to kind cluster
-# steps:
-# build docker image
-# change image in deploymeny/deployxyz.yaml to new image
-# load image to cluster - we avoid pushing it to dockerhub
-# deploy
+
 cluster_name=$(cat ../cluster/CLUSTERNAME)
 
 if [ "$1" != "" ]; then
