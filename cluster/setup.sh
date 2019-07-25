@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -e
 
 # script creates a Kubernetes cluser from scratch
 # configuration file is cluser-config.yaml
