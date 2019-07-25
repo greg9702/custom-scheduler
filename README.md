@@ -19,8 +19,8 @@ More about kind you can read [here](https://kind.sigs.k8s.io/).
 - [ ] make it possible to develop easily				<br>
 - [x] dashboard							<br>
 - [x] build my own node image <br>
-- [ ] figure out how default scheduler works in details <br>
 - [x] find out cases, where default scheduler is working in inefficient way  <br>
+- [x] figure out how default scheduler works in details <br>
 - [x] automate process of creating cluster - make script <br>
 - [ ] propose scheduling algorithm <br>
 - [ ] create scheduler using new algorithm <br>

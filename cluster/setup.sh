@@ -1,5 +1,17 @@
 #!/bin/bash
 
+set -e
+
+# script creates a Kubernetes cluser from scratch
+# configuration file is cluser-config.yaml
+
+
+# if set to 1, create dashboard
+create_dashboard=1
+# if set to 1 create admin account
+create_admin=1
+
+# set path to kind
 export PATH=$PATH:$(go env GOPATH)/bin
 
 if [ "$1" != "" ]; then
@@ -19,17 +31,13 @@ kind create cluster --config cluster-config.yaml --name=$cluster_name
 
 export KUBECONFIG="$(kind get kubeconfig-path --name=$cluster_name)"
 
-# if set to 1, create dashboard
-create_dashboard=1
-
-# if set to 1 create admin account
-create_admin=1
-
 if [ $create_dashboard == 1 ]; then
     echo "Creating dashboard..."
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
+
 	#we have to wait to assign ip address to this pod TODO do while loop
-	sleep 5
+	sleep 10
+
 	# change dashboard type to NodePort
 	kubectl patch svc -n kubernetes-dashboard kubernetes-dashboard --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
 
