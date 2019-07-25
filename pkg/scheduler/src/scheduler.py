@@ -7,7 +7,7 @@ import sys
 
 from kubernetes import client, config, watch
 
-config.load_kube_config(config_file='../kind-config-kind')
+config.load_kube_config(config_file='kind-config')
 v1 = client.CoreV1Api()
 print ("v1", v1)
 

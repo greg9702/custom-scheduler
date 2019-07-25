@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# perform commit before usage, get hash of commit 
+# perform commit before usage, get hash of commit
 # script to deploy whole application to kind cluster
 
 cluster_name=$(cat ../cluster/CLUSTERNAME)
