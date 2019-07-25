@@ -37,9 +37,12 @@ if [ $create_dashboard == 1 ]; then
     echo "Creating dashboard..."
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
 
-	#we have to wait to assign ip address to this pod TODO do while loop
+	# we have to wait to assign ip address to this pod TODO do while loop
 	echo "Waiting for dashboard scheduling..."
 	sleep 20
+	# TODO make this working Error from server (NotFound): pods "kubernetes-dashboard-xyz" not found
+	# pod_name=$(kubectl get pods -o wide --all-namespaces | grep "dashboard-" | awk '{printf $2}')
+	# kubectl wait --for=condition=Running pod/$pod_name --all-namespaces
 
 	# change dashboard type to NodePort
 	kubectl patch svc -n kubernetes-dashboard kubernetes-dashboard --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
