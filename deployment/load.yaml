@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: abc
-          image: load:0.1
+          image: load:2029645
           imagePullPolicy: Never
           # resources:
             # requests:
