@@ -1,8 +1,7 @@
 ### Overview
 Main goal of the project is to create my own scheduler. <br>
-Already found couple cases, where default scheduler do not perform in the most efficient way. <br>
-Unfortunately documentation do not specify too much details about scheduling process, <br>
-so I am working on to finding this out by myself.
+Found couple cases, where default scheduler do not perform in the most efficient way. <br>
+Proposed scheduler algorithm is going to use real time cluster resources usage and statistics.
 
 ### Cluster
 To create a local cluster I am using [kind](https://github.com/kubernetes-sigs/kind). <br>
