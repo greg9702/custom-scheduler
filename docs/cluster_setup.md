@@ -1,6 +1,4 @@
-#### export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
-Step by step cluster setup
-
+#### __Step by step cluster setup from scratch__
 <br>
 
 __Install go and kind using kind__
