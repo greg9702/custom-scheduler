@@ -15,3 +15,26 @@ In scoring phase, we rate every Node (selected in filtering phase) in different 
 This is the critical point. We have to decide which criteria we take under <br>
 consideration when scheduling a pod. Default scheduler has a lot of it both <br>
 in filtering phase and as in scoring phase. All are in details described [here](https://kubernetes.io/docs/concepts/scheduling/kube-scheduler/#default-policies). <br>
+
+
+#### Pseudo code
+
+```
+scheduler_name = 'costum scheduler'
+while (1) {
+	ListenforEvents() {
+		if newEvent() && Pod.status == 'Pending' && Pod.scheduler_name == scheduler_name{
+			FiltrNodes(Pod) return [Nodex, Nodey, Nodez ...]
+			ScoreNodes(...Nodes[]) return Node
+			BindNode(Pod, Node)
+		}
+	}
+}
+
+```
+
+#### Road Map
+
+__v0.1.0__ <br>
+First the simplest version as possible, FiltrNodes() return all Nodes in cluster. <br>
+ScoreNodes() select this node, which has least resources usage at this time. <br>
