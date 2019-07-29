@@ -5,6 +5,7 @@ import random
 import json
 import sys
 import pprint
+import copy
 
 from kubernetes import client, config, watch
 from node import Node
@@ -25,6 +26,7 @@ class Scheduler:
 		# update nodes
 		# filer nodes
 		# score Nodes
+		# bind Pod to Node
 		try:
 			self.updateNodes()
 			self.printNodes()
@@ -39,7 +41,49 @@ class Scheduler:
 		'''
 		self.all_nodes = []
 		for node in self.v1.list_node().items:
-			self.all_nodes.append(Node(node))
+			node.usage = self.getNodeUsage(node.metadata.name)
+			self.all_nodes.append(node)
+
+		return
+
+	def getNodeUsage(self, name_ = None):
+		'''
+		Get resources usage of Node
+		:param str name: Name of node
+		:return json object: object containg Node info
+		'''
+		if name_ == None:
+			raise Exception('passed wrong node name')
+
+		metrics_url = '/apis/metrics.k8s.io/v1beta1/nodes/' + name_
+		api_client = client.ApiClient()
+		response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
+		resp = response[0].data.decode('utf-8')
+		json_data = json.loads(resp)
+		return json_data['usage']
+
+
+	def filterNodes(self, pod):
+		'''
+		Filter out nodes form self.all_nodes which do not meet pod requirements
+		:return Node array: Nodes which met pod requirements
+		'''
+
+		return
+
+	def scoreNodes(self, pod):
+		'''
+		Rate every node returned by self.filterNodes()
+		:return: return Node with the highest rating
+		'''
+		return
+
+	def bindToNode(pod, node):
+		'''
+		Bind Pod to Node
+		:param str pod:
+		:param str node:
+		'''
 		return
 
 	def printNodes(self):
@@ -47,11 +91,11 @@ class Scheduler:
 		For debug purposes only
 		'''
 		for node in self.all_nodes:
-			print(node.node_data.metadata.name)
+			print(node.metadata.name)
 			print('usage')
-			print(node.node_usage['usage'])
+			print(node.usage)
 			print('capacity')
-			print(node.node_data.status.capacity)
+			print(node.status.capacity)
 
 
 def main():
