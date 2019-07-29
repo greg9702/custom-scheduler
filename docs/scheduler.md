@@ -18,23 +18,6 @@ in filtering phase and as in scoring phase. All are in details described [here](
 
 
 #### Code overview
-__node.py__
-```
-class Node:
-	def __init__(self, node_data_):
-		self.node_data = node_data_
-		self.node_usage = self.getNodeUsage()
-		return
-
-	def getNodeUsage(self):
-		'''
-		Get resources usage of Node
-		:param str name: Name of node
-		:return json object: object containg Node info
-		'''
-		return
-
-```
 __scheduler.py__
 ```
 class Scheduler:
@@ -77,6 +60,14 @@ class Scheduler:
 		Bind Pod to Node
 		:param str pod:
 		:param str node:
+		'''
+		return
+
+	def getNodeUsage(self):
+		'''
+		Get resources usage of Node
+		:param str name: Name of node
+		:return json object: object containg Node info
 		'''
 		return
 
