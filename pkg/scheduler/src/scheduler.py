@@ -8,7 +8,6 @@ import pprint
 import copy
 
 from kubernetes import client, config, watch
-from node import Node
 
 class Scheduler:
 	def __init__(self):
@@ -62,9 +61,9 @@ class Scheduler:
 		json_data = json.loads(resp)
 		return json_data['usage']
 
-
 	def filterNodes(self, pod):
 		'''
+		In v0.1.0 all nodes are passed to next step
 		Filter out nodes form self.all_nodes which do not meet pod requirements
 		:return Node array: Nodes which met pod requirements
 		'''
