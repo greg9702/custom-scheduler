@@ -4,9 +4,9 @@ import time
 import random
 import json
 import sys
-import pprint
 import copy
 
+from pprint import pprint
 from kubernetes import client, config, watch
 
 class Scheduler:
@@ -47,7 +47,8 @@ class Scheduler:
 		for node in self.v1.list_node().items:
 			node.usage = self.getNodeUsage(node.metadata.name)
 			self.all_nodes.append(node)
-
+		# pprint (self.v1.read_node(self.all_nodes[0].metadata.name))
+		# pprint(self.all_nodes[0].usage)
 		return
 
 	def getNodeUsage(self, name_ = None):
@@ -69,6 +70,7 @@ class Scheduler:
 	def filterNodes(self):
 		'''
 		In v0.1.0 all nodes are passed to next step
+		#TODO if after this phase there is only one node, select it
 		Filter out nodes form self.all_nodes which do not meet pod requirements
 		:return Node array: Nodes which met pod requirements
 		'''
@@ -121,10 +123,6 @@ class Scheduler:
 		'''
 		for node in self.all_nodes:
 			print(node.metadata.name)
-			print('usage')
-			print(node.usage)
-			print('capacity')
-			print(node.status.capacity)
 
 
 def main():
