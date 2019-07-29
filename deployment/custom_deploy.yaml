@@ -1,20 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-kubernetes-2
+  name: costum
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: hello-kubernetes
+      app: costum
   template:
     metadata:
       labels:
-        app: hello-kubernetes
+        app: costum
     spec:
-      schedulerName: foobar
+      schedulerName: custom_scheduler
       containers:
-      - name: hello-kubernetes
+      - name: costum
         image: paulbouwer/hello-kubernetes:1.5
-        ports:
-        - containerPort: 8080
