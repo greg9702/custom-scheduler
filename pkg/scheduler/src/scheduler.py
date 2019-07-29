@@ -35,40 +35,24 @@ class Scheduler:
 	def updateNodes(self):
 		'''
 		Update nodes in self.all_nodes.
-		Use getNodesUsage() and self.v1.list_node()
 		to retrive all the data
 		'''
 		self.all_nodes = []
 		for node in self.v1.list_node().items:
-			tmp_node = Node(node, self.getNodeUsage(node.metadata.name))
-			self.all_nodes.append(tmp_node)
+			self.all_nodes.append(Node(node))
 		return
 
-	def getNodeUsage(self, name=None):
-		'''
-		TODO move to Node module
-		Get resources usage of Node
-		:param str name: Name of node
-		:return json object: object containg Node info
-		'''
-
-		if name == None:
-			raise Exception('Not passed Node name')
-
-		metrics_url = '/apis/metrics.k8s.io/v1beta1/nodes/' + name
-		api_client = client.ApiClient()
-		response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
-		resp = response[0].data.decode('utf-8')
-		json_data = json.loads(resp)
-		return json_data
-
 	def printNodes(self):
+		'''
+		For debug purposes only
+		'''
 		for node in self.all_nodes:
 			print(node.node_data.metadata.name)
 			print('usage')
 			print(node.node_usage['usage'])
 			print('capacity')
 			print(node.node_data.status.capacity)
+
 
 def main():
 	scheduler = Scheduler()
