@@ -21,14 +21,19 @@ class Scheduler:
 
 	def run(self):
 		print('Scheduler running')
-		# watch for events
-		# update nodes
-		# filer nodes
-		# score Nodes
-		# bind Pod to Node
 		try:
-			self.updateNodes()
-			self.printNodes()
+			w = watch.Watch()
+			for event in w.stream(self.v1.list_namespaced_pod, "default"):
+				print("Event happened")
+				self.updateNodes()
+				print("Used scheduler: " + event['object'].spec.scheduler_name)
+				print ("Scheduling pod: ", event['object'].metadata.name)
+				if event['object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name:
+					try:
+						print ("Scheduling pod: ", event['object'].metadata.name)
+						res = self.bindToNode(event['object'].metadata.name, self.scoreNodes())
+					except client.rest.ApiException as e:
+						print (json.loads(e.body)['message'])
 		except Exception as e:
 			print(str(e))
 		return
@@ -61,29 +66,54 @@ class Scheduler:
 		json_data = json.loads(resp)
 		return json_data['usage']
 
-	def filterNodes(self, pod):
+	def filterNodes(self):
 		'''
 		In v0.1.0 all nodes are passed to next step
 		Filter out nodes form self.all_nodes which do not meet pod requirements
 		:return Node array: Nodes which met pod requirements
 		'''
+		return self.all_nodes
 
-		return
-
-	def scoreNodes(self, pod):
+	def scoreNodes(self):
 		'''
 		Rate every node returned by self.filterNodes()
 		:return: return Node with the highest rating
 		'''
-		return
+		filtered_nodes = self.filterNodes()
+		ret_node = filtered_nodes[0]
+		for node in filtered_nodes:
+			print (node.metadata.name)
+			node_mem_usage = int(node.usage['memory'][:-2])
+			print (node_mem_usage)
+			ret_node_mem_usage = int(ret_node.usage['memory'][:-2])
+			if node_mem_usage < ret_node_mem_usage:
+				ret_node = node
 
-	def bindToNode(pod, node):
+		print('selected node', ret_node.metadata.name)
+		return ret_node.metadata.name
+
+	def bindToNode(self, pod_name, node, namespace='default'):
 		'''
 		Bind Pod to Node
 		:param str pod:
 		:param str node:
 		'''
-		return
+		target = client.V1ObjectReference()
+		target.kind = "Node"
+		target.api_version = "v1"
+		target.name = node
+
+		meta = client.V1ObjectMeta()
+		meta.name = pod_name
+		body = client.V1Binding(target = target)
+		body.target = target
+		body.metadata = meta
+		try:
+			self.v1.create_namespaced_binding(namespace, body)
+			return True
+		except:
+			print ('exception')
+			return False
 
 	def printNodes(self):
 		'''
