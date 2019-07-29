@@ -17,24 +17,67 @@ consideration when scheduling a pod. Default scheduler has a lot of it both <br>
 in filtering phase and as in scoring phase. All are in details described [here](https://kubernetes.io/docs/concepts/scheduling/kube-scheduler/#default-policies). <br>
 
 
-#### Pseudo code
+#### Code overview
+__node.py__
+```
+class Node:
+	def __init__(self, node_data_):
+		self.node_data = node_data_
+		self.node_usage = self.getNodeUsage()
+		return
+
+	def getNodeUsage(self):
+		'''
+		Get resources usage of Node
+		:param str name: Name of node
+		:return json object: object containg Node info
+		'''
+		return
 
 ```
-scheduler_name = 'costum scheduler'
-while (1) {
-	ListenforEvents() {
-		if newEvent() && Pod.status == 'Pending' && Pod.scheduler_name == scheduler_name{
-			FiltrNodes(Pod) return [Nodex, Nodey, Nodez ...]
-			ScoreNodes(...Nodes[]) return Node
-			BindNode(Pod, Node)
-		}
-	}
-}
+__scheduler.py__
+```
+class Scheduler:
+	def __init__(self):
+		self.scheduler_name = 'custom_scheduler'
+		self.all_nodes=[]
+		self.run()
+		return
+
+	def run(self):
+		# watch for events
+		# update nodes
+		# filter nodes
+		# score Nodes
+		# bind Pod to Node
+		return
+
+	def updateNodes(self):
+		'''
+		Update nodes in self.all_nodes
+		'''
+		return
+
+	def filterNodes(self, pod):
+		'''
+		Filter out nodes form  which do not meet pod requirements
+		:return Node array: Nodes which met pod requirements
+		'''
+		return
+
+	def scoreNodes(self, pod):
+		'''
+		Rate every node returned by self.filterNodes()
+		:return: return Node with the highest rating
+		'''
+		return
+
+	def bindToNode(pod, node):
+		'''
+		Bind Pod to Node
+		:param str pod:
+		:param str node:
+		'''
+		return
 
 ```
-
-#### Road Map
-
-__v0.1.0__ <br>
-First the simplest version as possible, FiltrNodes() return all Nodes in cluster. <br>
-ScoreNodes() select this node, which has least resources usage at this time. <br>
