@@ -12,7 +12,10 @@ from kubernetes import client, config, watch
 
 class Scheduler:
 	def __init__(self):
-		config.load_kube_config(config_file='../kind-config')
+		# add my own field to V1Node object
+		client.models.v1_node.V1Node.swagger_types['usage'] = 'object'
+		client.models.v1_node.V1Node.attribute_map['usage'] = 'usage'
+
 		config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
 		self.v1 = client.CoreV1Api()
 		self.scheduler_name = 'custom_scheduler'
