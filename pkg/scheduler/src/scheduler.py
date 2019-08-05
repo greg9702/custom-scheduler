@@ -23,16 +23,16 @@ class Scheduler:
 		self.all_nodes=[]
 
 		# line commented for testing
-		# self.run()
+		self.run()
 		return
 
 	def run(self):
 		print('Scheduler running')
+		self.updateNodes()
 		try:
 			w = watch.Watch()
 			for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
 				print("Event happened")
-				self.updateNodes()
 				print("Used scheduler: " + event['object'].spec.scheduler_name)
 				print ("Scheduling pod: ", event['object'].metadata.name)
 				if event['object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name:
@@ -54,7 +54,7 @@ class Scheduler:
 		for node in self.v1.list_node().items:
 			node.usage = self.getNodeUsage(node.metadata.name)
 			self.all_nodes.append(node)
-
+			pprint(node)
 		return
 
 	def getNodeUsage(self, name_ = None):
