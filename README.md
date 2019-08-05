@@ -14,7 +14,7 @@ More about kind you can read [here](https://kind.sigs.k8s.io/).
 - [x] make example scheduler working 				 <br>
 - [x] force assignment of scheduler to master node 		<br>
 - [x] get logs from scheduler pod					<br>
-- [ ] make node capacity custom  				-<br>
+- [ ] make node capacity custom  				<br>
 - [x] dashboard							<br>
 - [x] build my own node image <br>
 - [x] find out cases, where default scheduler is working in inefficient way  <br>
@@ -22,6 +22,6 @@ More about kind you can read [here](https://kind.sigs.k8s.io/).
 - [x] automate process of creating cluster - make script <br>
 - [x] automate deployment  				<br>
 - [x] make cluster monitoring system working <br>
-- [ ] propose scheduling algorithm <br>
-- [ ] create scheduler using new algorithm <br>
-- [ ] test it <br>
+- [x] propose scheduling algorithm <br>
+- [ ] create scheduler <br>
+- [ ] add tests <br>
