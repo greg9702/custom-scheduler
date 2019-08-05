@@ -1,6 +1,7 @@
 import pytest
+import os
+import sys
 
-import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
 from scheduler import Scheduler
 
