@@ -10,6 +10,8 @@
 create_dashboard=1
 # if set to 1 create admin account
 create_admin=1
+# if set to 1 create metrics server deployment
+create_metrics_server=1
 
 # set path to kind
 export PATH=$PATH:$(go env GOPATH)/bin
@@ -73,4 +75,12 @@ if [ $create_admin == 1 ]; then
 	 echo ""
 else
 	echo "Admin account not created"
+fi
+
+# create metrics server-deployment
+if [ $create_metrics_server == 1 ]; then
+	echo "Creating metrics server deployment..."
+	kubectl create -f ../deployment/metrics_server_deploy/1.8+/
+else
+	echo "Metrics server not created"
 fi
