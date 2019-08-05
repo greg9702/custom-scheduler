@@ -28,7 +28,7 @@ class Scheduler:
 		print('Scheduler running')
 		try:
 			w = watch.Watch()
-			for event in w.stream(self.v1.list_namespaced_pod, "default"):
+			for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
 				print("Event happened")
 				self.updateNodes()
 				print("Used scheduler: " + event['object'].spec.scheduler_name)
