@@ -1,3 +1,4 @@
 pkg/*/__pycache__1Api()
 pkg/*/kind-config
 .gitignore
+*__pycache__
