@@ -22,8 +22,8 @@ class Scheduler:
 		self.scheduler_name = 'custom_scheduler'
 		self.all_nodes=[]
 
-		# line commented for tests phase
-		self.run()
+		# line commented for testing
+		# self.run()
 		return
 
 	def run(self):
