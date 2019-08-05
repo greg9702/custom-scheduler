@@ -35,6 +35,8 @@ kind create cluster --config cluster-config.yaml --name=$cluster_name
 
 export KUBECONFIG="$(kind get kubeconfig-path --name=$cluster_name)"
 
+# TODO copy new claster config file to all directories where it is required
+
 if [ $create_dashboard == 1 ]; then
     echo "Creating dashboard..."
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
