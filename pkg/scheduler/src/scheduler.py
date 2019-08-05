@@ -4,6 +4,7 @@ import time
 import random
 import json
 import sys
+import os
 import copy
 
 from pprint import pprint
@@ -12,6 +13,7 @@ from kubernetes import client, config, watch
 class Scheduler:
 	def __init__(self):
 		config.load_kube_config(config_file='../kind-config')
+		config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
 		self.v1 = client.CoreV1Api()
 		self.scheduler_name = 'custom_scheduler'
 		self.all_nodes=[]
