@@ -7,6 +7,7 @@ import sys
 import os
 import copy
 
+
 from pprint import pprint
 from kubernetes import client, config, watch
 
@@ -21,6 +22,7 @@ class Scheduler:
 		self.scheduler_name = 'custom_scheduler'
 		self.all_nodes=[]
 
+		# line commented for tests phase
 		self.run()
 		return
 
@@ -52,8 +54,7 @@ class Scheduler:
 		for node in self.v1.list_node().items:
 			node.usage = self.getNodeUsage(node.metadata.name)
 			self.all_nodes.append(node)
-		# pprint (self.v1.read_node(self.all_nodes[0].metadata.name))
-		# pprint(self.all_nodes[0].usage)
+
 		return
 
 	def getNodeUsage(self, name_ = None):
@@ -122,13 +123,20 @@ class Scheduler:
 			print ('exception')
 			return False
 
-	def printNodes(self):
+	def retNode(self, name_ = None):
 		'''
-		For debug purposes only
+		Get node object
+		:param str name: name of the node
+		:return: return node object
 		'''
-		for node in self.all_nodes:
-			print(node.metadata.name)
+		if name_ == None:
+			raise Exception('passed wrong node name')
 
+		for node in self.all_nodes:
+			if node.metadata.name == name_:
+				return node
+
+		return None
 
 def main():
 	scheduler = Scheduler()
