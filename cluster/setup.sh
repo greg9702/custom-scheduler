@@ -81,6 +81,7 @@ fi
 if [ $create_metrics_server == 1 ]; then
 	echo "Creating metrics server deployment..."
 	kubectl create -f ../deployment/metrics_server_deploy/1.8+/
+	echo "Mertics server would be ready in couple minutes."
 else
 	echo "Metrics server not created"
 fi
