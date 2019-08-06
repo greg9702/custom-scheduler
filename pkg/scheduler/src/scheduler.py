@@ -19,10 +19,9 @@ class Scheduler:
 		self.scheduler_name = 'custom_scheduler'
 		self.all_nodes=[]
 
-		# lines commented for testing
-		# config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
-		# self.v1 = client.CoreV1Api()
-		self.run()
+		config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
+		self.v1 = client.CoreV1Api()
+
 		return
 
 	def run(self):
@@ -32,6 +31,7 @@ class Scheduler:
 			w = watch.Watch()
 			for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
 				print("Event happened")
+				self.updateNodes()
 				print("Used scheduler: " + event['object'].spec.scheduler_name)
 				print ("Scheduling pod: ", event['object'].metadata.name)
 				if event['object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name:
@@ -139,6 +139,7 @@ class Scheduler:
 
 def main():
 	scheduler = Scheduler()
+	scheduler.run()
 
 if __name__ == '__main__':
     main()
