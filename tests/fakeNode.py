@@ -1,29 +1,19 @@
-# TODO add __repr__
+from kubernetes import client
 
-class fakeNode:
+class fakeNode(client.models.V1Node):
 	def __init__(self):
-		self.metadata = metadata()
-		self.spec = spec()
-		self.status = status()
-		self.usage = usage()
+		client.models.v1_node.V1Node.swagger_types['usage'] = 'object'
+		client.models.v1_node.V1Node.attribute_map['usage'] = 'usage'
+		self.api_version = "fakenode"
+		self.kind = "fakenode"
+		self.metadata = client.models.V1ObjectMeta()
+		self.spec = client.models.V1NodeSpec()
+		self.status = client.models.V1NodeStatus()
+		self.usage = {}
 
+def main():
+	f = fakeNode()
+	print(f.usage)
 
-class metadata:
-	def __init__(self):
-		self.labels = {}
-		self.name = ""
-		pass
-
-class spec:
-	def __init__(self):
-		self.taints = []
-		self.unschedulable = ''
-
-class status:
-	def __init__(self):
-		self.allocatable = {}
-		self.capacity = {}
-
-class usage:
-	def __init__(self):
-		pass
+if __name__ == '__main__':
+	main()
