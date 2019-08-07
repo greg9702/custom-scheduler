@@ -4,3 +4,4 @@ pkg/*/kind-config
 *__pycache__
 sandbox
 venv
+.vscode
