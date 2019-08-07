@@ -59,7 +59,8 @@ class Scheduler:
 		for node in self.v1.list_node().items:
 			node.usage = self.getNodeUsage(node.metadata.name)
 			self.all_nodes.append(node)
-			pprint(node)
+			node.pods = client.models.V1PodList(items = [])
+			node.pods.items = []
 		self.podsOnNodes()
 		return
 
