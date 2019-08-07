@@ -97,9 +97,9 @@ class Scheduler:
 		filtered_nodes = self.filterNodes()
 		ret_node = filtered_nodes[0]
 		for node in filtered_nodes:
-			print (node.metadata.name)
+			# print (node.metadata.name)
 			node_mem_usage = int(node.usage['memory'][:-2])
-			print (node_mem_usage)
+			# print (node_mem_usage)
 			ret_node_mem_usage = int(ret_node.usage['memory'][:-2])
 			if node_mem_usage < ret_node_mem_usage:
 				ret_node = node
@@ -150,8 +150,11 @@ class Scheduler:
 		Assign Pod to node which
 		'''
 		for pod in self.v1.list_pod_for_all_namespaces().items:
-			pprint(pod)
-			# TODO handle every pod - assign it to node in self.all_nodes.pods
+			# print(pod.metadata.name, pod.spec.node_name)
+			for node in self.all_nodes:
+				if node.metadata.name == pod.spec.node_name:
+					node.pods.items.append(pod)
+
 		return
 
 def main():
