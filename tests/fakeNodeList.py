@@ -1,6 +1,14 @@
 import json
-
 from fakeNode import fakeNode
+
+'''
+		Original node list class attributes
+
+        'api_version': 'str',
+        'items': 'list[V1Node]',
+        'kind': 'str',
+        'metadata': 'V1ListMeta'
+'''
 
 class fakeNodeList:
 	def __init__(self):
