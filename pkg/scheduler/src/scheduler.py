@@ -27,6 +27,8 @@ class Scheduler:
 	def run(self):
 		print('Scheduler running')
 		self.updateNodes()
+
+		return
 		try:
 			w = watch.Watch()
 			for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
@@ -54,6 +56,7 @@ class Scheduler:
 			node.usage = self.getNodeUsage(node.metadata.name)
 			self.all_nodes.append(node)
 			pprint(node)
+		self.podsOnNodes()
 		return
 
 	def getNodeUsage(self, name_ = None):
@@ -136,6 +139,15 @@ class Scheduler:
 				return node
 
 		return None
+
+	def podsOnNodes(self):
+		'''
+		Assign Pod to node which
+		'''
+		for pod in self.v1.list_pod_for_all_namespaces().items:
+			pprint(pod)
+			# TODO handle every pod - assign it to node in self.all_nodes.pods
+		return
 
 def main():
 	scheduler = Scheduler()
