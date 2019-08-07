@@ -10,6 +10,7 @@ from fakeNodeList import fakeNodeList
 sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
 from scheduler import Scheduler
 
+#TODO remove this from global
 nodes_params = [
 '''{"metadata": { "labels": {"beta.kubernetes.io/arch": "amd64",
                          "beta.kubernetes.io/os": "linux",
@@ -85,6 +86,12 @@ class testClass(unittest.TestCase):
 		self.mocked_binding.return_value = None
 		sched = Scheduler()
 
-	def test_2(self):
+	def test_get_nodes(self):
+		# TODO test if nodes are correctly added
+		pass
+
+	def test_pods_on_node(self):
 		# self.assertEqual(sched.updateNodes(), "")
+		# TODO test if assigning pods work fine 
+
 		pass
