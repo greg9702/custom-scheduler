@@ -22,11 +22,11 @@ class testClass(unittest.TestCase):
 
 	def setUp(self):
 
-		self.nodes_list = fakeNodeList()
-		self.nodes_list.addNodes(node_templates.nodes_params)
+		self.nodes_list = fakeNodeList() # TODO automate this
+		self.nodes_list.addNodes()
 
-		self.pods_list = fakePodList()
-		self.pods_list.addPods(pod_template.pods_params)
+		self.pods_list = fakePodList() 	# TODO automate this
+		self.pods_list.addPods()
 
 		self.patcher1 = patch('kubernetes.client.CoreV1Api.list_node')
 		self.mock_list_nodes = self.patcher1.start()
