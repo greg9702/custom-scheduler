@@ -1,9 +1,9 @@
 pods_params = [
-"""{"metadata": {"generate_name": "test1",
+"""{"metadata": {"generate_name": "test_pod_1",
               "labels": {"k8s-app": "kube-dns",
                          "pod-template-hash": "5c98db65d4"}},
  "spec": {"affinity": "None",
-          "node_name": "kind-control",
+          "node_name": "control-plane",
           "scheduler_name": "default-scheduler",
           "containers": [{"name": "container_1",
                           "resources": {"limits": {"memory": "170Mi"},
