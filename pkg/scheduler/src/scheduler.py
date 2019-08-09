@@ -150,10 +150,11 @@ class Scheduler:
 		Assign Pod to node which
 		'''
 		for pod in self.v1.list_pod_for_all_namespaces().items:
-			# print(pod.metadata.name, pod.spec.node_name)
-			for node in self.all_nodes:
-				if node.metadata.name == pod.spec.node_name:
-					node.pods.items.append(pod)
+			# if pod is running, it is assigned to node
+			if pod.status.phase == 'Running':
+				for node in self.all_nodes:
+					if node.metadata.name == pod.spec.node_name:
+						node.pods.items.append(pod)
 
 		return
 
