@@ -21,7 +21,7 @@ nodes_params = [
                          "hugepages-2Mi": "0",
                          "memory": "8045056Ki",
                          "pods": "110"}},
- "usage": {"cpu": "253011429n", "memory": "698744Ki"}}''',
+ "usage": {"cpu": "200000000n", "memory": "2000000Ki"}}''',
 
 '''{"metadata": { "labels": {"beta.kubernetes.io/arch": "amd64",
                          "beta.kubernetes.io/os": "linux",
@@ -45,5 +45,5 @@ nodes_params = [
                          "hugepages-2Mi": "0",
                          "memory": "8045056Ki",
                          "pods": "110"}},
- "usage": {"cpu": "253011429n", "memory": "698744Ki"}}'''
+ "usage": {"cpu": "300000000n", "memory": "3000000Ki"}}'''
  ]
