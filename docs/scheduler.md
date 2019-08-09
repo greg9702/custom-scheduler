@@ -16,8 +16,20 @@ This is the critical point. We have to decide which criteria we take under <br>
 consideration when scheduling a pod. Default scheduler has a lot of it both <br>
 in filtering phase and as in scoring phase. All are in details described [here](https://kubernetes.io/docs/concepts/scheduling/kube-scheduler/#default-policies). <br>
 
+#### My scheduling criteria
+Concept of the scheduler is to schedule Pods on Nodes which are least loaded. <br>
+In cases where Pods limits and requests are directly specified, it will be respected. <br>
+For Pods, which do not have requests and limits specified, data from metrics server will be retrieved. <br>
+In final version historical/statistic data for each pod are going to be used, but for now data received at the moment will be used. <br>
+Pod limits and requests are calculated as sum of limits and requests for every container running inside it. <br>
+General limits and requests for Node is calculated as sum of limits and requests of all Pods running on it.
+Approximately, the general formula for would look like this:
+>[Node resources available] = [Node capacity] - [Node requests and limits / Node usage]
 
-#### Code overview
+There is also a second option, to completely ignore requests and limits, but it would <br>
+deny Kubernetes conception.
+
+#### Scheduler code overview
 __scheduler.py__
 ```
 class Scheduler:
@@ -30,6 +42,7 @@ class Scheduler:
 	def run(self):
 		# watch for events
 		# update nodes
+		# update pods on all nodes
 		# filter nodes
 		# score Nodes
 		# bind Pod to Node
