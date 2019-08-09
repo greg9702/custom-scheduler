@@ -16,8 +16,12 @@ from fakePod import fakePod
 class fakePodList:
     def __init__(self):
         self.items = []
+        return
 
     def addPods(self):
+        '''
+        Creates fakePods and add it to self.items
+        '''
         pods_params = pod_template.pods_params
         for pod in pods_params:
             fake_pod = fakePod()
