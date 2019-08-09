@@ -11,7 +11,7 @@ from fakePod import fakePod
 from fakePodList import fakePodList
 
 import pod_template
-import node_templates
+import node_template
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
 from scheduler import Scheduler
