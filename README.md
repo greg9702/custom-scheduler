@@ -22,6 +22,8 @@ More about kind you can read [here](https://kind.sigs.k8s.io/).
 - [x] automate process of creating cluster - make script <br>
 - [x] automate deployment  				<br>
 - [x] make cluster monitoring system working <br>
-- [x] propose scheduling algorithm <br>
-- [ ] create scheduler <br>
-- [ ] add tests <br>
+
+#### Updates
+Working on tests and test environment. <br>
+Finished mocking all used API calls. <br>
+Working on creating dynamic environment and writing more test.
