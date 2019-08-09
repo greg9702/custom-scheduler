@@ -28,6 +28,11 @@ from kubernetes import client
 
 class fakeContainer:
     def __init__(self, name = "", limits = {}, requests = {}):
+        '''
+        :param str name: container name
+        :param dict limits: container memory and cpu limits
+        :param dict requests: container memory and cpu requests
+        '''
         self.name = name
         self.resources = client.models.V1ResourceRequirements()
         self.resources.limits = limits
