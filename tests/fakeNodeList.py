@@ -28,5 +28,5 @@ class fakeNodeList:
 			fake_node.spec.unschedulable = json_node['spec']['unschedulable']
 			fake_node.status.allocatable = json_node['status']['allocatable']
 			fake_node.status.capacity = json_node['status']['capacity']
-			fake_node.usage = json_node['usage']
+			fake_node.usage = json_node['usage'] # this should not be here, but for simplicity it is
 			self.items.append(fake_node)
