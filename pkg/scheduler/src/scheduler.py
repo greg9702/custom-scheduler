@@ -29,6 +29,9 @@ class Scheduler:
         return
 
     def run(self):
+        '''
+        Run everything step by step
+        '''
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
@@ -97,21 +100,19 @@ class Scheduler:
         filtered_nodes = self.filterNodes()
         ret_node = filtered_nodes[0]
         for node in filtered_nodes:
-            # print (node.metadata.name)
             node_mem_usage = int(node.usage['memory'][:-2])
-            # print (node_mem_usage)
             ret_node_mem_usage = int(ret_node.usage['memory'][:-2])
             if node_mem_usage < ret_node_mem_usage:
                 ret_node = node
-
-        print('selected node', ret_node.metadata.name)
         return ret_node.metadata.name
 
     def bindToNode(self, pod_name, node, namespace='default'):
         '''
         Bind Pod to Node
-        :param str pod:
-        :param str node:
+        :param str pod: pod name which we are binding
+        :param str node: node name which pod has to be binded
+        :param str namespace: namespace of pod
+        :return: True if pod was binded sucesfully, False otherwise
         '''
         target = client.V1ObjectReference()
         target.kind = "Node"
@@ -155,7 +156,6 @@ class Scheduler:
                 for node in self.all_nodes:
                     if node.metadata.name == pod.spec.node_name:
                         node.pods.items.append(pod)
-
         return
 
 def main():
