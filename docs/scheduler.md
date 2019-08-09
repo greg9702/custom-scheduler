@@ -3,7 +3,7 @@ For every Pod that the scheduler discovers, the scheduler becomes responsible <b
 for finding the best Node for that Pod to run on. <br>
 For every newly created Pods or other unscheduled Pods, kube-scheduler selects <br>
 a optimal Node for them to run on. Newly created Pods it is meant Pod in phase _Pending_. <br>
-Default scheduler use two phases to schedule a Pod. It is reasonable, so this idea should be kept.
+We can point out two steps in Pod scheduling process:
 - filtering
 - scoring.
 
@@ -72,6 +72,3 @@ class Scheduler:
 		return
 
 ```
-
-#### TODO
-Retrive Node requests and limits 
