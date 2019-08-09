@@ -16,4 +16,4 @@ class fakeNode():
 		self.spec = client.models.V1NodeSpec()
 		self.status = client.models.V1NodeStatus()
 		self.usage = {}
-		# TODO add pods on this node attribute
+		self.pods = client.models.V1PodList(items = [])
