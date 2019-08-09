@@ -31,7 +31,7 @@ class Scheduler:
 	def run(self):
 		print('Scheduler running')
 		self.updateNodes()
-
+		self.podsOnNodes()
 		return
 		try:
 			w = watch.Watch()
@@ -61,7 +61,7 @@ class Scheduler:
 			node.pods = client.models.V1PodList(items = [])
 			node.pods.items = []
 			self.all_nodes.append(node)
-		self.podsOnNodes()
+
 		return
 
 	def getNodeUsage(self, name_ = None):
