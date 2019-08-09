@@ -3,6 +3,7 @@ import os
 import sys
 import unittest
 import json
+
 from unittest.mock import patch
 from kubernetes import client
 from fakeNode import fakeNode
@@ -45,42 +46,82 @@ class testClass(unittest.TestCase):
 	def tearDown(self):
 		return
 
-	def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
-		#TODO set usage depending on node-name - metrics_url
-		class tmpHttpObj():
-			def __init__(self):
-				self.data =(b'{"kind":"NodeMetrics","apiVersion":"metrics.k8s.io/v1beta1","metadata":{"nam'
-				 b'e":"kind-control-plane","selfLink":"/apis/metrics.k8s.io/v1beta1/nodes/kind-'
-				 b'control-plane","creationTimestamp":"2019-08-09T10:13:48Z"},"timestamp":"2019'
-				 b'-08-09T10:12:48Z","window":"30s","usage":{"cpu":"231151777n","memory":"87917'
-				 b'2Ki"}}\n')
-		retobj = tmpHttpObj()
-		return [retobj]
-
-
 	def test_init(self):
+		'''
+		Test if initialization works fine and if nodes are empty.
 
+		'''
+		sched = Scheduler()
+		self.assertEqual(sched.scheduler_name, 'custom_scheduler')
+		self.assertEqual(sched.all_nodes, [])
 
+		return
+
+	def test_update_nodes(self):
+		'''
+		Test updateNodes and getNodeUsage methods.
+		On this stage scheduler have all static and dynamic (usage)
+		data of all nodes.
+		'''
 		self.mock_list_nodes.return_value = self.nodes_list
-
 		self.mocked_binding.return_value = None
-
 		self.mocked_get_node_usage.side_effect = self.getUsageSideEffect
-
-		self.mocked_all_pods.return_value = self.pods_list
 
 		sched = Scheduler()
 		sched.updateNodes()
 
 		self.assertNotEqual(sched.all_nodes, [])
-		# self.assertEqual(sched.all_nodes[0].metadata.name , 'control-plane')
+		self.assertEqual(sched.all_nodes[0].metadata.name , 'control-plane')
+		self.assertEqual(sched.all_nodes[1].metadata.name , 'worker-node')
+		self.assertEqual(sched.all_nodes[0].pods.items, [])
+		self.assertEqual(sched.all_nodes[0].usage , {"cpu":"200000000n","memory":"2000000Ki"})
+		self.assertEqual(sched.all_nodes[1].usage , {"cpu":"300000000n","memory":"3000000Ki"})
 
-	def test_get_nodes(self):
-		# TODO test if nodes are correctly added
-		pass
+		return
 
-	def test_pods_on_node(self):
-		# self.assertEqual(sched.updateNodes(), "")
-		# TODO test if assigning pods work fine
+	def test_pods_on_nodes(self):
+		'''
+		Test podsOnNodes method.
+		Check if all pods were added correctly to nodes
+		'''
+		self.mock_list_nodes.return_value = self.nodes_list
+		self.mocked_binding.return_value = None
+		self.mocked_get_node_usage.side_effect = self.getUsageSideEffect
+		self.mocked_all_pods.return_value = self.pods_list
 
-		pass
+		sched = Scheduler()
+		sched.updateNodes()
+		sched.podsOnNodes()
+
+		for node in sched.all_nodes:
+			if node.metadata.name == 'control-plane':
+				self.assertNotEqual(node.pods.items, [])
+				self.assertEqual(node.pods.items[0].metadata.generate_name , 'test_pod_1')
+				self.assertEqual(node.pods.items[0].spec.containers[0].name , 'container_1')
+			if node.metadata.name == 'worker-node':
+				self.assertEqual(node.pods.items, [])
+
+		return
+
+	def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
+
+		a = self.nodes_list
+		class tmpHttpObj():
+			def __init__(self):
+				node_name = metrics_url.split('/')[-1]
+				self.tmp = ''
+				self.data = b''
+				for node in a.items:
+					if node.metadata.name == node_name:
+						cpu = node.usage['cpu']
+						memory = node.usage['memory']
+						self.tmp ='''{"usage":{"cpu":"''' + str(cpu) + '''","memory":"''' + str(memory) + '''"}}\n'''
+						self.data = bytes(self.tmp, 'utf-8')
+
+		retobj = tmpHttpObj()
+		return [retobj]
+
+
+	#
+	# def test_aval_res(self):
+	# 	pass
