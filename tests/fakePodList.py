@@ -1,9 +1,8 @@
 import json
-import pod_template
 import fakeContainer
+import pod_template
 from kubernetes import client
 from fakePod import fakePod
-
 
 '''
 		Original pod class
@@ -19,7 +18,8 @@ class fakePodList:
 		self.items = []
 		pass
 
-	def addPods(self, pods_params):
+	def addPods(self):
+		pods_params = pod_template.pods_params
 		for pod in pods_params:
 			fake_pod = fakePod()
 			json_pod = json.loads(pod)
