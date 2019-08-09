@@ -3,12 +3,12 @@ from fakeNode import fakeNode
 import node_template
 
 '''
-        Original node list class attributes
+    Original node list class attributes
 
-        'api_version': 'str',
-        'items': 'list[V1Node]',
-        'kind': 'str',
-        'metadata': 'V1ListMeta'
+    'api_version': 'str',
+    'items': 'list[V1Node]',
+    'kind': 'str',
+    'metadata': 'V1ListMeta'
 '''
 
 class fakeNodeList:
