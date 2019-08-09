@@ -22,10 +22,10 @@ from scheduler import Scheduler
 class testClass(unittest.TestCase):
 
 	def setUp(self):
-
-		self.nodes_list = fakeNodeList() 
+		# all nodes in cluster
+		self.nodes_list = fakeNodeList()
 		self.nodes_list.addNodes()
-
+		# all pods in cluster
 		self.pods_list = fakePodList()
 		self.pods_list.addPods()
 
