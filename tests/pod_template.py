@@ -12,7 +12,7 @@ pods_params = [
                          {"name": "container_2",
                           "resources": {"limits": {"memory": "170Mi"},
                                         "requests": {"cpu": "100m",
-			                                         "memory": "70Mi"}}}],
+                                                     "memory": "70Mi"}}}],
           "tolerations": [{"effect": "None",
                            "key": "CriticalAddonsOnly",
                            "operator": "Exists",
