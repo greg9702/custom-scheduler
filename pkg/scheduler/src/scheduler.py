@@ -14,11 +14,14 @@ from kubernetes import client, config, watch
 class Scheduler:
     def __init__(self):
         # adding my own attribute to V1Node object for tracking usage
-        client.models.v1_node.V1Node.swagger_types['usage'] = 'object'
+        client.models.v1_node.V1Node.swagger_types['usage'] = 'dict(str, str)'
         client.models.v1_node.V1Node.attribute_map['usage'] = 'usage'
-        # adding my own attribute to V1Node object for
+        # adding my own attribute to V1Node object
         client.models.v1_node.V1Node.swagger_types['pods'] = 'V1PodList'
         client.models.v1_node.V1Node.attribute_map['pods'] = 'pods'
+        # adding my own usage attribute to V1 pod
+        client.models.v1_pod.V1Pod.swagger_types['usage'] = 'dict(str, str)'
+        client.models.v1_pod.V1Pod.attribute_map['usage'] = 'usage'
 
         self.scheduler_name = 'custom_scheduler'
         self.all_nodes=[]
@@ -35,6 +38,7 @@ class Scheduler:
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
+        print(self.all_nodes[0].pods.items[0].usage)
         return
         try:
             w = watch.Watch()
@@ -155,8 +159,10 @@ class Scheduler:
             if pod.status.phase == 'Running':
                 for node in self.all_nodes:
                     if node.metadata.name == pod.spec.node_name:
+                        pod.usage = None # TODO = self.podUsage()
                         node.pods.items.append(pod)
         return
+
 
 def main():
     scheduler = Scheduler()
