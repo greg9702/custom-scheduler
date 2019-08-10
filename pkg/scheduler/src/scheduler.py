@@ -38,8 +38,8 @@ class Scheduler:
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
-        print(self.all_nodes[0].pods.items[0].usage)
         return
+
         try:
             w = watch.Watch()
             for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
@@ -159,10 +159,36 @@ class Scheduler:
             if pod.status.phase == 'Running':
                 for node in self.all_nodes:
                     if node.metadata.name == pod.spec.node_name:
-                        pod.usage = None # TODO = self.podUsage()
+                        pod.usage = self.podUsage(pod.metadata.name, pod.metadata.namespace)
                         node.pods.items.append(pod)
         return
 
+    def podUsage(self, name_ = None, namespace_ = None):
+        '''
+        Return Pod usage in format dict(str, str)
+        :param str name_: name of Pod
+        :param str namespace_: namespace of Pod
+        :return dict: return usage {'cpu' : xxx, 'memory' : yyy}
+        '''
+        if name_ == None:
+            raise Exception('passed wrong Pod name')
+        if namespace_ == None:
+            raise Exception('passed wrong namespace name')
+
+        metrics_url = '/apis/metrics.k8s.io/v1beta1/namespaces/' + namespace_ + '/pods/' + name_
+        api_client = client.ApiClient()
+        response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
+        resp = response[0].data.decode('utf-8')
+        json_data = json.loads(resp)
+        # Pod usage is sum of usage of all containers running inside it
+        tmp_mem = 0
+        tmp_cpu = 0
+        for cont in json_data['containers']:
+            tmp_mem += int(cont['usage']['memory'][:-2])
+            tmp_cpu += int(cont['usage']['cpu'][:-2])
+
+        return_json = {'cpu' : str(tmp_cpu) + 'n', 'memory' : str(tmp_mem) + 'Ki'}
+        return return_json
 
 def main():
     scheduler = Scheduler()
