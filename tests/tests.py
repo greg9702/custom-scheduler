@@ -113,7 +113,8 @@ class testClass(unittest.TestCase):
 
         self.assertEqual(sched.podUsage(self.pods_list.items[0].metadata.name, self.pods_list.items[0].metadata.namespace)['cpu'], '1000000n')
         self.assertEqual(sched.podUsage(self.pods_list.items[1].metadata.name, self.pods_list.items[1].metadata.namespace)['memory'], '9000Ki')
-        pass
+
+        return
 
     def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
 
