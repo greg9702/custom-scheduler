@@ -38,6 +38,7 @@ class Scheduler:
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
+        # print(self.all_nodes[0].pods.items[0].metadata.name, self.all_nodes[0].pods.items[0].usage)
         return
 
         try:
@@ -163,7 +164,7 @@ class Scheduler:
                         node.pods.items.append(pod)
         return
 
-    def podUsage(self, name_ = None, namespace_ = None):
+    def podUsage(self, name_, namespace_):
         '''
         Return Pod usage in format dict(str, str)
         :param str name_: name of Pod
@@ -185,7 +186,7 @@ class Scheduler:
         tmp_cpu = 0
         for cont in json_data['containers']:
             tmp_mem += int(cont['usage']['memory'][:-2])
-            tmp_cpu += int(cont['usage']['cpu'][:-2])
+            tmp_cpu += int(cont['usage']['cpu'][:-1])
 
         return_json = {'cpu' : str(tmp_cpu) + 'n', 'memory' : str(tmp_mem) + 'Ki'}
         return return_json
