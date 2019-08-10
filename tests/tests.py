@@ -94,28 +94,61 @@ class testClass(unittest.TestCase):
         for node in sched.all_nodes:
             if node.metadata.name == 'control-plane':
                 self.assertNotEqual(node.pods.items, [])
-                self.assertEqual(node.pods.items[0].metadata.generate_name , 'test_pod_1')
+                self.assertEqual(node.pods.items[0].metadata.name, 'test_pod_1')
                 self.assertEqual(node.pods.items[0].spec.containers[0].name , 'container_1')
             if node.metadata.name == 'worker-node':
                 self.assertEqual(node.pods.items, [])
 
         return
 
+    def test_pod_usage(self):
+        '''
+        Check if pod usage is calculated correctly
+        '''
+        self.mock_list_nodes.return_value = self.nodes_list
+        self.mocked_binding.return_value = None
+        self.mocked_call_api.side_effect = self.getUsageSideEffect
+        self.mocked_all_pods.return_value = self.pods_list
+        sched = Scheduler()
+
+        self.assertEqual(sched.podUsage(self.pods_list.items[0].metadata.name, self.pods_list.items[0].metadata.namespace)['cpu'], '1000000n')
+        self.assertEqual(sched.podUsage(self.pods_list.items[1].metadata.name, self.pods_list.items[1].metadata.namespace)['memory'], '9000Ki')
+        pass
+
     def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
 
-        a = self.nodes_list
+        test_nodes_list = self.nodes_list
+        test_pods_list = self.pods_list
 
         class tmpHttpObj():
             def __init__(self):
-                node_name = metrics_url.split('/')[-1]
-                self.tmp = ''
-                self.data = b''
-                for node in a.items:
-                    if node.metadata.name == node_name:
-                        cpu = node.usage['cpu']
-                        memory = node.usage['memory']
-                        self.tmp ='''{"usage":{"cpu":"''' + str(cpu) + '''","memory":"''' + str(memory) + '''"}}\n'''
-                        self.data = bytes(self.tmp, 'utf-8')
+                if metrics_url.split('/')[-2] == 'nodes':
+                    # call for node usage
+                    node_name = metrics_url.split('/')[-1]
+                    self.tmp = ''
+                    self.data = b''
+                    for node in test_nodes_list.items:
+                        if node.metadata.name == node_name:
+                            cpu = node.usage['cpu']
+                            memory = node.usage['memory']
+                            self.tmp ='''{"usage":{"cpu":"''' + str(cpu) + '''","memory":"''' + str(memory) + '''"}}\n'''
+                            self.data = bytes(self.tmp, 'utf-8')
+
+                if metrics_url.split('/')[-2] == 'pods':
+                    # call for pod usage
+                    pod_name = metrics_url.split('/')[-1]
+                    pod_namespace = metrics_url.split('/')[-3]
+                    self.tmp = ''
+                    self.data = b''
+                    for pod in test_pods_list.items:
+                        if pod.metadata.name == pod_name:
+                            self.tmp = {'containers': []}
+                            for cont in pod.spec.containers:
+                                cpu = cont.usage['cpu']
+                                memory = cont.usage['memory']
+                                self.tmp['containers'].append({"usage": {"cpu": str(cpu),"memory": str(memory)}})
+                            string_tmp = json.dumps(self.tmp)
+                            self.data = bytes(string_tmp, 'utf-8')
 
         retobj = tmpHttpObj()
         return [retobj]
