@@ -35,6 +35,6 @@ class fakePodList:
             fake_pod.spec.tolerations = json_pod['spec']['tolerations']
             fake_pod.status.phase = json_pod['status']['phase']
             for el in json_pod['spec']['containers']:
-                fake_pod.spec.containers.append(fakeContainer.fakeContainer(el['name'], el['resources']['limits'], el['resources']['requests']))
+                fake_pod.spec.containers.append(fakeContainer.fakeContainer(el['name'], el['resources']['limits'], el['resources']['requests'], el['usage']))
             self.items.append(fake_pod)
         return

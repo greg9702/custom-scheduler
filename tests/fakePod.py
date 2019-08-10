@@ -15,4 +15,5 @@ class fakePod:
         self.metadata = client.models.V1ObjectMeta()
         self.spec = client.models.V1PodSpec(containers = [])
         self.status = client.models.V1PodStatus()
+        self.usage = {}
         return

@@ -1,4 +1,4 @@
-pods_params = [
+pods_paramsusage = [
 """{"metadata": {"generate_name": "test_pod_1",
               "labels": {"k8s-app": "kube-dns",
                          "pod-template-hash": "5c98db65d4"}},
@@ -8,11 +8,8 @@ pods_params = [
           "containers": [{"name": "container_1",
                           "resources": {"limits": {"memory": "170Mi"},
                                         "requests": {"cpu": "100m",
-                                                     "memory": "70Mi"}}},
-                         {"name": "container_2",
-                          "resources": {"limits": {"memory": "170Mi"},
-                                        "requests": {"cpu": "100m",
-                                                     "memory": "70Mi"}}}],
+                                                     "memory": "70Mi"}}
+                          "usage": {"cpu": "500000n", "memory": "9000Ki"}}],
           "tolerations": [{"effect": "None",
                            "key": "CriticalAddonsOnly",
                            "operator": "Exists",
@@ -33,5 +30,5 @@ pods_params = [
                            "operator": "Exists",
                            "toleration_seconds": 300,
                            "value": "None"}]},
- "status": {"phase": "Running"}}"""
+ "status": {"phase": "Running"}}""",
  ]

@@ -27,7 +27,7 @@ from kubernetes import client
 '''
 
 class fakeContainer:
-    def __init__(self, name = "", limits = {}, requests = {}):
+    def __init__(self, name = "", limits = {}, requests = {}, usage = {}):
         '''
         :param str name: container name
         :param dict limits: container memory and cpu limits
@@ -37,4 +37,5 @@ class fakeContainer:
         self.resources = client.models.V1ResourceRequirements()
         self.resources.limits = limits
         self.resources.requests = requests
+        self.usage = usage
         return
