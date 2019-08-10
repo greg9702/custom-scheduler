@@ -34,7 +34,7 @@ class testClass(unittest.TestCase):
         self.mocked_binding = self.patcher2.start()
 
         self.patcher3 = patch('kubernetes.client.ApiClient.call_api')
-        self.mocked_get_node_usage = self.patcher3.start()
+        self.mocked_call_api = self.patcher3.start()
 
         self.patcher4 = patch('kubernetes.client.CoreV1Api.list_pod_for_all_namespaces')
         self.mocked_all_pods = self.patcher4.start()
@@ -63,7 +63,7 @@ class testClass(unittest.TestCase):
         '''
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
-        self.mocked_get_node_usage.side_effect = self.getUsageSideEffect
+        self.mocked_call_api.side_effect = self.getUsageSideEffect
 
         sched = Scheduler()
         sched.updateNodes()
@@ -84,7 +84,7 @@ class testClass(unittest.TestCase):
         '''
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
-        self.mocked_get_node_usage.side_effect = self.getUsageSideEffect
+        self.mocked_call_api.side_effect = self.getUsageSideEffect
         self.mocked_all_pods.return_value = self.pods_list
 
         sched = Scheduler()
