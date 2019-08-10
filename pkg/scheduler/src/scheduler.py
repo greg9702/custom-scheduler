@@ -38,8 +38,11 @@ class Scheduler:
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
-        # print(self.all_nodes[0].pods.items[0].metadata.name, self.all_nodes[0].pods.items[0].usage)
-        return
+        # try:
+        #     print(self.all_nodes[1].pods.items[0].metadata.name, self.all_nodes[1].pods.items[0].spec.containers[0].resources.requests['cpu'])
+        # except Exception as e:
+        #     print('Do not show argument')
+        # return
 
         try:
             w = watch.Watch()
@@ -185,11 +188,21 @@ class Scheduler:
         tmp_mem = 0
         tmp_cpu = 0
         for cont in json_data['containers']:
-            tmp_mem += int(cont['usage']['memory'][:-2])
-            tmp_cpu += int(cont['usage']['cpu'][:-1])
+            # when Pod is in Error state, it containers usage is returned as 0
+            if cont['usage']['memory'] != '0':
+                tmp_mem += int(cont['usage']['memory'][:-2])
+            if cont['usage']['cpu'] != '0':
+                tmp_cpu += int(cont['usage']['cpu'][:-1])
 
         return_json = {'cpu' : str(tmp_cpu) + 'n', 'memory' : str(tmp_mem) + 'Ki'}
         return return_json
+
+    def nodeResAval(self):
+        '''
+        Function to calculate real resources,
+        node capacity - every pod container requests (or real time usage if requests are not specified)
+        '''
+
 
 def main():
     scheduler = Scheduler()
