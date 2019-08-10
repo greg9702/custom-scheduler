@@ -3,8 +3,8 @@
 # perform commit before usage, get hash of commit
 # script to deploy whole application to kind cluster
 
+set -e
 cluster_name=$(cat ../cluster/CLUSTERNAME)
-
 if [ "$1" != "" ]; then
     app_name=$1
 else
