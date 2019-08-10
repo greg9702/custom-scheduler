@@ -96,6 +96,7 @@ class testClass(unittest.TestCase):
                 self.assertNotEqual(node.pods.items, [])
                 self.assertEqual(node.pods.items[0].metadata.name, 'test_pod_1')
                 self.assertEqual(node.pods.items[0].spec.containers[0].name , 'container_1')
+                # TODO test when request == {}
             if node.metadata.name == 'worker-node':
                 self.assertEqual(node.pods.items, [])
 
@@ -113,7 +114,8 @@ class testClass(unittest.TestCase):
 
         self.assertEqual(sched.podUsage(self.pods_list.items[0].metadata.name, self.pods_list.items[0].metadata.namespace)['cpu'], '1000000n')
         self.assertEqual(sched.podUsage(self.pods_list.items[1].metadata.name, self.pods_list.items[1].metadata.namespace)['memory'], '9000Ki')
-
+        self.assertEqual(self.pods_list.items[2].metadata.name, 'test_pod_3_0_usage_test')
+        self.assertEqual(sched.podUsage(self.pods_list.items[2].metadata.name, self.pods_list.items[2].metadata.namespace)['memory'], '0Ki')
         return
 
     def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
