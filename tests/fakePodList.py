@@ -27,7 +27,8 @@ class fakePodList:
             fake_pod = fakePod()
             json_pod = json.loads(pod)
             fake_pod.spec.containers = []
-            fake_pod.metadata.generate_name = json_pod['metadata']['generate_name']
+            fake_pod.metadata.name = json_pod['metadata']['name']
+            fake_pod.metadata.namespace = json_pod['metadata']['namespace']
             fake_pod.metadata.labels = json_pod['metadata']['labels']
             fake_pod.spec.affinity = json_pod['spec']['affinity']
             fake_pod.spec.node_name = json_pod['spec']['node_name']
