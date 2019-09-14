@@ -7,10 +7,10 @@ import json
 from unittest.mock import patch
 from kubernetes import client
 
+from scheduler import Scheduler
 from testenv import creator
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
-from scheduler import Scheduler
 
 class testClass(unittest.TestCase):
 
@@ -45,10 +45,8 @@ class testClass(unittest.TestCase):
         return
 
     def test_init(self):
-        '''
-        Test if initialization works fine and if nodes are empty.
+        """Test if initialization works fine and if nodes are empty."""
 
-        '''
         sched = Scheduler()
         self.assertEqual(sched.scheduler_name, 'custom_scheduler')
         self.assertEqual(sched.all_nodes, [])
@@ -56,11 +54,10 @@ class testClass(unittest.TestCase):
         return
 
     def test_update_nodes(self):
-        '''
-        Test updateNodes and getNodeUsage methods.
+        """Test updateNodes and getNodeUsage methods.
         On this stage scheduler have all static and dynamic (usage)
-        data of all nodes.
-        '''
+        data of all nodes."""
+
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
         self.mocked_call_api.side_effect = self.getUsageSideEffect
@@ -78,10 +75,9 @@ class testClass(unittest.TestCase):
         return
 
     def test_pods_on_nodes(self):
-        '''
-        Test podsOnNodes method.
-        Check if all pods were added correctly to nodes
-        '''
+        """Test podsOnNodes method.
+        Check if all pods were added correctly to nodes"""
+
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
         self.mocked_call_api.side_effect = self.getUsageSideEffect
@@ -103,9 +99,8 @@ class testClass(unittest.TestCase):
         return
 
     def test_pod_usage(self):
-        '''
-        Check if pod usage is calculated correctly
-        '''
+        """Check if pod usage is calculated correctly."""
+
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
         self.mocked_call_api.side_effect = self.getUsageSideEffect
@@ -119,6 +114,8 @@ class testClass(unittest.TestCase):
         return
 
     def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
+        """Side effect function for get usage of a pod,
+        return string tmpHttpObj, same api_client.call_api() method"""
 
         test_nodes_list = self.nodes_list
         test_pods_list = self.pods_list
