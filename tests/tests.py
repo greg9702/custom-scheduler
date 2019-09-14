@@ -7,22 +7,24 @@ import json
 from unittest.mock import patch
 from kubernetes import client
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
+
 from scheduler import Scheduler
 from testenv import creator
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
 
 class testClass(unittest.TestCase):
 
     def setUp(self):
+        creat = creator.Creator()
         try:
-            self.nodes_list = creator.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/node_01.template'), 'Node')
+            self.nodes_list = creat.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/node_01.template'), 'Node')
         except BaseException as e:
             print('Error occured!', str(e))
             sys.exit(-1)
 
         try:
-            self.pods_list = creator.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/pods_01.template'), 'Pod')
+            self.pods_list = creat.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/pods_01.template'), 'Pod')
         except BaseException as e:
             print('Error occured!', str(e))
             sys.exit(-1)

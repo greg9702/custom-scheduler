@@ -3,45 +3,49 @@ import sys
 from testenv.fakeNodeList import fakeNodeList
 from testenv.fakePodList import fakePodList
 
-def read_from_file(filename):
-    """Read from template file, return file content as
-    raw string
-    :param str filename: path to a file
-    :return: return raw string with content"""
-    
-    f = open(filename)
-    line = f.readline()
-    str = R''
-    while line:
-        if line:
-            str += line
-            line = f.readline()
-    f.close()
-    return str
 
-def create_from_file(filename, temp_type):
-    """Read from Node or Pod template file,
-    than create fakePodsList or fakeNodeList object.
-    :param str filename: name of a input file
-    :param str temp_type: type of template Node or Pod"""
+class Creator:
+    """Creates test enviroment using template files"""
 
-    if temp_type == 'Node':
-        node_list = fakeNodeList()
-        str = read_from_file(filename)
+    def read_from_file(self, filename):
+        """Read from template file, return file content as
+        raw string
+        :param str filename: path to a file
+        :return: return raw string with content"""
 
-        node_list.addNodes(str)
+        f = open(filename)
+        line = f.readline()
+        str = R''
+        while line:
+            if line:
+                str += line
+                line = f.readline()
+        f.close()
+        return str
 
-        return node_list
+    def create_from_file(self, filename, temp_type):
+        """Read from Node or Pod template file,
+        than create fakePodsList or fakeNodeList object.
+        :param str filename: name of a input file
+        :param str temp_type: type of template Node or Pod"""
 
-    elif temp_type == 'Pod':
-        pod_list = fakePodList()
-        str = read_from_file(filename)
+        if temp_type == 'Node':
+            node_list = fakeNodeList()
+            str = self.read_from_file(filename)
 
-        pod_list.addPods(str)
+            node_list.addNodes(str)
 
-        return pod_list
+            return node_list
 
-    else:
-        raise ValueError('Invalid template type')
+        elif temp_type == 'Pod':
+            pod_list = fakePodList()
+            str = self.read_from_file(filename)
 
-    return
+            pod_list.addPods(str)
+
+            return pod_list
+
+        else:
+            raise ValueError('Invalid template type')
+
+        return
