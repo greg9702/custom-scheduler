@@ -32,9 +32,8 @@ class Scheduler:
         return
 
     def run(self):
-        '''
-        Run everything step by step
-        '''
+        """Run everything step by step"""
+
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
@@ -62,10 +61,9 @@ class Scheduler:
         return
 
     def updateNodes(self):
-        '''
-        Update nodes in self.all_nodes.
-        to retrive all the data
-        '''
+        """Update nodes in self.all_nodes.
+        to retrive all the data"""
+
         self.all_nodes = []
         for node in self.v1.list_node().items:
             node.usage = self.getNodeUsage(node.metadata.name)
@@ -76,11 +74,10 @@ class Scheduler:
         return
 
     def getNodeUsage(self, name_ = None):
-        '''
-        Get resources usage of Node
+        """Get resources usage of Node
         :param str name: Name of node
-        :return json object: object containg Node info
-        '''
+        :return json object: object containg Node info"""
+
         if name_ == None:
             raise Exception('passed wrong node name')
 
@@ -92,19 +89,17 @@ class Scheduler:
         return json_data['usage']
 
     def filterNodes(self):
-        '''
-        In v0.1.0 all nodes are passed to next step
+        """In v0.1.0 all nodes are passed to next step
         #TODO if after this phase there is only one node, select it
         Filter out nodes form self.all_nodes which do not meet pod requirements
-        :return Node array: Nodes which met pod requirements
-        '''
+        :return Node array: Nodes which met pod requirements"""
+
         return self.all_nodes
 
     def scoreNodes(self):
-        '''
-        Rate every node returned by self.filterNodes()
-        :return: return Node with the highest rating
-        '''
+        """Rate every node returned by self.filterNodes()
+        :return: return Node with the highest rating"""
+
         filtered_nodes = self.filterNodes()
         ret_node = filtered_nodes[0]
         for node in filtered_nodes:
@@ -115,13 +110,12 @@ class Scheduler:
         return ret_node.metadata.name
 
     def bindToNode(self, pod_name, node, namespace='default'):
-        '''
-        Bind Pod to Node
+        """Bind Pod to Node
         :param str pod: pod name which we are binding
         :param str node: node name which pod has to be binded
         :param str namespace: namespace of pod
-        :return: True if pod was binded sucesfully, False otherwise
-        '''
+        :return: True if pod was binded sucesfully, False otherwise"""
+
         target = client.V1ObjectReference()
         target.kind = "Node"
         target.api_version = "v1"
@@ -140,11 +134,10 @@ class Scheduler:
             return False
 
     def retNode(self, name_ = None):
-        '''
-        Get node object
+        """Get node object
         :param str name: name of the node
-        :return: return node object
-        '''
+        :return: return node object"""
+
         if name_ == None:
             raise Exception('passed wrong node name')
 
@@ -155,9 +148,8 @@ class Scheduler:
         return None
 
     def podsOnNodes(self):
-        '''
-        Assign Pod to node which
-        '''
+        """Assign Pod to node which it is running on"""
+
         for pod in self.v1.list_pod_for_all_namespaces().items:
             # if pod is running, it is assigned to node
             if pod.status.phase == 'Running':
@@ -168,12 +160,11 @@ class Scheduler:
         return
 
     def podUsage(self, name_, namespace_):
-        '''
-        Return Pod usage in format dict(str, str)
+        """Return Pod usage in format dict(str, str)
         :param str name_: name of Pod
         :param str namespace_: namespace of Pod
-        :return dict: return usage {'cpu' : xxx, 'memory' : yyy}
-        '''
+        :return dict: return usage {'cpu' : xxx, 'memory' : yyy}"""
+
         if name_ == None:
             raise Exception('passed wrong Pod name')
         if namespace_ == None:
@@ -198,11 +189,10 @@ class Scheduler:
         return return_json
 
     def nodeResAval(self):
-        '''
-        Function to calculate real resources,
-        node capacity - every pod container requests (or real time usage if requests are not specified)
-        '''
-
+        """Function to calculate real resources,
+        node capacity - every pod container requests (or real time usage
+        if requests are not specified)"""
+        pass
 
 def main():
     scheduler = Scheduler()

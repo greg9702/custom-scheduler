@@ -3,26 +3,28 @@ import json
 from testenv.fakeContainer import fakeContainer
 from testenv.fakePod import fakePod
 
+
 from kubernetes import client
 
-'''
+"""
         Original pod class
 
         'api_version': 'str',
         'items': 'list[V1Pod]',
         'kind': 'str',
         'metadata': 'V1ListMeta'
-'''
+"""
 
 class fakePodList:
+    """Mock class used in tests"""
+
     def __init__(self):
         self.items = []
         return
 
     def addPods(self, pods_params):
-        '''
-        Creates fakePods and add it to self.items
-        '''
+        """Creates fakePods and add it to self.items"""
+
         for pod in pods_params.split('$$$$'):
             fake_pod = fakePod()
             json_pod = json.loads(pod)

@@ -2,24 +2,24 @@ import json
 
 from testenv.fakeNode import fakeNode
 
-'''
+"""
     Original node list class attributes
-
-    'api_version': 'str',
-    'items': 'list[V1Node]',
-    'kind': 'str',
-    'metadata': 'V1ListMeta'
-'''
+    v1_node_list.py
+        'api_version': 'str',
+        'items': 'list[V1Node]',
+        'kind': 'str',
+        'metadata': 'V1ListMeta'
+"""
 
 class fakeNodeList:
+    """Mock class used in tests"""
+
     def __init__(self):
-        #'items': 'list[V1Node]',
         self.items = []
 
     def addNodes(self, node_params):
-        '''
-        Creates fakeNodes nodes and append it to self.items
-        '''
+        """Creates fakeNodes and append it to self.items"""
+
         for node in node_params.split('$$$$'):
             fake_node = fakeNode()
             json_node = json.loads(node)

@@ -1,44 +1,41 @@
+import sys
+
 from testenv.fakeNodeList import fakeNodeList
 from testenv.fakePodList import fakePodList
 
-import sys
+def read_from_file(filename):
+    """Read from template file, return file content as
+    raw string
+    :param str filename: path to a file
+    :return: return raw string with content"""
+    
+    f = open(filename)
+    line = f.readline()
+    str = R''
+    while line:
+        if line:
+            str += line
+            line = f.readline()
+    f.close()
+    return str
 
-
-'''
-Read from Node or Pod template file,
-than create array of Pods or Nodes
-:param filename: name of a input file
-:param temp_type: type of template Node or Pod
-'''
-def create_from_file(file_name, temp_type):
+def create_from_file(filename, temp_type):
+    """Read from Node or Pod template file,
+    than create fakePodsList or fakeNodeList object.
+    :param str filename: name of a input file
+    :param str temp_type: type of template Node or Pod"""
 
     if temp_type == 'Node':
         node_list = fakeNodeList()
-        f = open(file_name)
-        line = f.readline()
-        str = R''
-        while line:
-            if line:
-                str += line
-                line = f.readline()
-        f.close()
+        str = read_from_file(filename)
 
         node_list.addNodes(str)
 
         return node_list
 
-
     elif temp_type == 'Pod':
-        pass
         pod_list = fakePodList()
-        f = open(file_name)
-        line = f.readline()
-        str = R''
-        while line:
-            if line:
-                str += line
-                line = f.readline()
-        f.close()
+        str = read_from_file(filename)
 
         pod_list.addPods(str)
 

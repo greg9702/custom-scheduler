@@ -1,14 +1,15 @@
 from kubernetes import client
 
-'''
+"""
     Original node class attributes
 
-    'api_version': 'str',
-    'kind': 'str',
-    'metadata': 'V1ObjectMeta',
-    'spec': 'V1NodeSpec',
-    'status': 'V1NodeStatus'
-'''
+    v1node.py
+        'api_version': 'str',
+        'kind': 'str',
+        'metadata': 'V1ObjectMeta',
+        'spec': 'V1NodeSpec',
+        'status': 'V1NodeStatus'
+"""
 
 class fakeNode():
     def __init__(self):
