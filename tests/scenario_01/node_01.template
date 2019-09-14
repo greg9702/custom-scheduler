@@ -1,5 +1,4 @@
-nodes_params = [
-'''{"metadata": { "labels": {"beta.kubernetes.io/arch": "amd64",
+{"metadata": { "labels": {"beta.kubernetes.io/arch": "amd64",
                          "beta.kubernetes.io/os": "linux",
                          "kubernetes.io/arch": "amd64",
                          "kubernetes.io/hostname": "kind-control-plane",
@@ -21,9 +20,9 @@ nodes_params = [
                          "hugepages-2Mi": "0",
                          "memory": "8045056Ki",
                          "pods": "110"}},
- "usage": {"cpu": "200000000n", "memory": "2000000Ki"}}''',
-
-'''{"metadata": { "labels": {"beta.kubernetes.io/arch": "amd64",
+ "usage": {"cpu": "200000000n", "memory": "2000000Ki"}}
+$$$$
+{"metadata": { "labels": {"beta.kubernetes.io/arch": "amd64",
                          "beta.kubernetes.io/os": "linux",
                          "kubernetes.io/arch": "amd64",
                          "kubernetes.io/hostname": "worker-node",
@@ -45,5 +44,4 @@ nodes_params = [
                          "hugepages-2Mi": "0",
                          "memory": "8045056Ki",
                          "pods": "110"}},
- "usage": {"cpu": "300000000n", "memory": "3000000Ki"}}'''
- ]
+ "usage": {"cpu": "300000000n", "memory": "3000000Ki"}}

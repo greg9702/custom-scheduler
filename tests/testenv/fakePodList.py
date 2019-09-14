@@ -1,8 +1,9 @@
 import json
-import fakeContainer
-import pod_template
+
+from testenv.fakeContainer import fakeContainer
+from testenv.fakePod import fakePod
+
 from kubernetes import client
-from fakePod import fakePod
 
 '''
         Original pod class
@@ -18,12 +19,11 @@ class fakePodList:
         self.items = []
         return
 
-    def addPods(self):
+    def addPods(self, pods_params):
         '''
         Creates fakePods and add it to self.items
         '''
-        pods_params = pod_template.pods_params
-        for pod in pods_params:
+        for pod in pods_params.split('$$$$'):
             fake_pod = fakePod()
             json_pod = json.loads(pod)
             fake_pod.spec.containers = []
@@ -36,6 +36,6 @@ class fakePodList:
             fake_pod.spec.tolerations = json_pod['spec']['tolerations']
             fake_pod.status.phase = json_pod['status']['phase']
             for el in json_pod['spec']['containers']:
-                fake_pod.spec.containers.append(fakeContainer.fakeContainer(el['name'], el['resources']['limits'], el['resources']['requests'], el['usage']))
+                fake_pod.spec.containers.append(fakeContainer(el['name'], el['resources']['limits'], el['resources']['requests'], el['usage']))
             self.items.append(fake_pod)
         return

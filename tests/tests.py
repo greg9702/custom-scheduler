@@ -6,13 +6,8 @@ import json
 
 from unittest.mock import patch
 from kubernetes import client
-from fakeNode import fakeNode
-from fakeNodeList import fakeNodeList
-from fakePod import fakePod
-from fakePodList import fakePodList
 
-import pod_template
-import node_template
+from testenv import creator
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../pkg/scheduler/src'))
 from scheduler import Scheduler
@@ -20,12 +15,17 @@ from scheduler import Scheduler
 class testClass(unittest.TestCase):
 
     def setUp(self):
-        # all nodes in cluster
-        self.nodes_list = fakeNodeList()
-        self.nodes_list.addNodes()
-        # all pods in cluster
-        self.pods_list = fakePodList()
-        self.pods_list.addPods()
+        try:
+            self.nodes_list = creator.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/node_01.template'), 'Node')
+        except BaseException as e:
+            print('Error occured!', str(e))
+            sys.exit(-1)
+
+        try:
+            self.pods_list = creator.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/pods_01.template'), 'Pod')
+        except BaseException as e:
+            print('Error occured!', str(e))
+            sys.exit(-1)
 
         self.patcher1 = patch('kubernetes.client.CoreV1Api.list_node')
         self.mock_list_nodes = self.patcher1.start()
@@ -126,7 +126,6 @@ class testClass(unittest.TestCase):
         class tmpHttpObj():
             def __init__(self):
                 if metrics_url.split('/')[-2] == 'nodes':
-                    # call for node usage
                     node_name = metrics_url.split('/')[-1]
                     self.tmp = ''
                     self.data = b''
@@ -138,7 +137,6 @@ class testClass(unittest.TestCase):
                             self.data = bytes(self.tmp, 'utf-8')
 
                 if metrics_url.split('/')[-2] == 'pods':
-                    # call for pod usage
                     pod_name = metrics_url.split('/')[-1]
                     pod_namespace = metrics_url.split('/')[-3]
                     self.tmp = ''

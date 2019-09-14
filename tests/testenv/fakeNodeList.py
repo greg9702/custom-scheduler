@@ -1,6 +1,6 @@
 import json
-from fakeNode import fakeNode
-import node_template
+
+from testenv.fakeNode import fakeNode
 
 '''
     Original node list class attributes
@@ -16,12 +16,11 @@ class fakeNodeList:
         #'items': 'list[V1Node]',
         self.items = []
 
-    def addNodes(self):
+    def addNodes(self, node_params):
         '''
         Creates fakeNodes nodes and append it to self.items
         '''
-        nodes_params = node_template.nodes_params
-        for node in nodes_params:
+        for node in node_params.split('$$$$'):
             fake_node = fakeNode()
             json_node = json.loads(node)
             fake_node.metadata.labels = json_node['metadata']['labels']
