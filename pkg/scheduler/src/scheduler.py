@@ -32,37 +32,44 @@ class Scheduler:
         return
 
     def run(self):
-        """Run everything step by step"""
+        """
+        Run everything step by step
+        """
 
         print('Scheduler running')
         self.updateNodes()
         self.podsOnNodes()
+        # for item in self.all_nodes[0].pods.items:
+        #     print(item.metadata.name)
+
         # try:
         #     print(self.all_nodes[1].pods.items[0].metadata.name, self.all_nodes[1].pods.items[0].spec.containers[0].resources.requests['cpu'])
         # except Exception as e:
         #     print('Do not show argument')
         # return
 
-        try:
-            w = watch.Watch()
-            for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
-                print("Event happened")
-                self.updateNodes()
-                print("Used scheduler: " + event['object'].spec.scheduler_name)
-                print ("Scheduling pod: ", event['object'].metadata.name)
-                if event['object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name:
-                    try:
-                        print ("Scheduling pod: ", event['object'].metadata.name)
-                        res = self.bindToNode(event['object'].metadata.name, self.scoreNodes())
-                    except client.rest.ApiException as e:
-                        print (json.loads(e.body)['message'])
-        except Exception as e:
-            print(str(e))
+        # try:
+        #     w = watch.Watch()
+        #     for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
+        #         print("Event happened")
+        #         self.updateNodes()
+        #         print("Used scheduler: " + event['object'].spec.scheduler_name)
+        #         print ("Scheduling pod: ", event['object'].metadata.name)
+        #         if event['object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name:
+        #             try:
+        #                 print ("Scheduling pod: ", event['object'].metadata.name)
+        #                 res = self.bindToNode(event['object'].metadata.name, self.scoreNodes())
+        #             except client.rest.ApiException as e:
+        #                 print (json.loads(e.body)['message'])
+        # except Exception as e:
+        #     print(str(e))
         return
 
     def updateNodes(self):
-        """Update nodes in self.all_nodes.
-        to retrive all the data"""
+        """
+        Update nodes in self.all_nodes.
+        to retrive all the data
+        """
 
         self.all_nodes = []
         for node in self.v1.list_node().items:
@@ -74,9 +81,11 @@ class Scheduler:
         return
 
     def getNodeUsage(self, name_ = None):
-        """Get resources usage of Node
+        """
+        Get resources usage of Node
         :param str name: Name of node
-        :return json object: object containg Node info"""
+        :return json object: object containg Node info
+        """
 
         if name_ == None:
             raise Exception('passed wrong node name')
@@ -89,16 +98,20 @@ class Scheduler:
         return json_data['usage']
 
     def filterNodes(self):
-        """In v0.1.0 all nodes are passed to next step
-        #TODO if after this phase there is only one node, select it
+        """
+        In v0.1.0 all nodes are passed to next step
         Filter out nodes form self.all_nodes which do not meet pod requirements
-        :return Node array: Nodes which met pod requirements"""
+        :return Node array: Nodes which met pod requirements
+        """
 
+        #TODO if after this phase there is only one node, select it
         return self.all_nodes
 
     def scoreNodes(self):
-        """Rate every node returned by self.filterNodes()
-        :return: return Node with the highest rating"""
+        """
+        Rate every node returned by self.filterNodes()
+        :return str: return Node name with the highest rating
+        """
 
         filtered_nodes = self.filterNodes()
         ret_node = filtered_nodes[0]
@@ -110,11 +123,13 @@ class Scheduler:
         return ret_node.metadata.name
 
     def bindToNode(self, pod_name, node, namespace='default'):
-        """Bind Pod to Node
+        """
+        Bind Pod to Node
         :param str pod: pod name which we are binding
         :param str node: node name which pod has to be binded
         :param str namespace: namespace of pod
-        :return: True if pod was binded sucesfully, False otherwise"""
+        :return: True if pod was binded sucesfully, False otherwise
+        """
 
         target = client.V1ObjectReference()
         target.kind = "Node"
@@ -134,9 +149,11 @@ class Scheduler:
             return False
 
     def retNode(self, name_ = None):
-        """Get node object
+        """
+        Get node object
         :param str name: name of the node
-        :return: return node object"""
+        :return: return node object
+        """
 
         if name_ == None:
             raise Exception('passed wrong node name')
@@ -148,7 +165,9 @@ class Scheduler:
         return None
 
     def podsOnNodes(self):
-        """Assign Pod to node which it is running on"""
+        """
+        Add Pod to node which it is running on
+        """
 
         for pod in self.v1.list_pod_for_all_namespaces().items:
             # if pod is running, it is assigned to node
@@ -160,10 +179,12 @@ class Scheduler:
         return
 
     def podUsage(self, name_, namespace_):
-        """Return Pod usage in format dict(str, str)
+        """
+        Return Pod usage in format dict(str, str)
         :param str name_: name of Pod
         :param str namespace_: namespace of Pod
-        :return dict: return usage {'cpu' : xxx, 'memory' : yyy}"""
+        :return dict: return usage {'cpu' : xxx, 'memory' : yyy}
+        """
 
         if name_ == None:
             raise Exception('passed wrong Pod name')
@@ -189,10 +210,35 @@ class Scheduler:
         return return_json
 
     def nodeResAval(self):
-        """Function to calculate real resources,
+        """
+        Function to calculate real resources,
         node capacity - every pod container requests (or real time usage
-        if requests are not specified)"""
+        if requests are not specified)
+        """
         pass
+
+
+    def passToScheduler(self, name_, namespace_, scheduler_name_ = 'default-scheduler'):
+        """
+        Pass deployment to be scheduled by different scheduler
+        :param str scheduler_name_: name of new scheduler, which will
+            schedule this deployment
+        :param str name_: name of deployment
+        :param str namespace_: namespace of deployment
+        :return str: return http response code
+        """
+
+        #TODO check corectness of passed params
+
+        url = '/apis/extensions/v1beta1/namespaces/' + namespace_ + '/deployments/' + name_
+        headers = {'Accept': 'application/json', 'Content-Type': 'application/strategic-merge-patch+json'}
+        body = {"spec":{"template":{"spec":{"schedulerName": scheduler_name_}}}}
+        api_client = client.ApiClient()
+        response = api_client.call_api(url, 'PATCH', header_params = headers, body = body)
+
+        print(response[1])
+        return
+
 
 def main():
     scheduler = Scheduler()
