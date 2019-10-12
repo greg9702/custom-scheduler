@@ -41,6 +41,7 @@ class Scheduler:
         self.podsOnNodes()
         # for item in self.all_nodes[0].pods.items:
         #     print(item.metadata.name)
+        self.passToScheduler('load2', 'defaul432t')
 
         # try:
         #     print(self.all_nodes[1].pods.items[0].metadata.name, self.all_nodes[1].pods.items[0].spec.containers[0].resources.requests['cpu'])
@@ -168,7 +169,6 @@ class Scheduler:
         """
         Add Pod to node which it is running on
         """
-
         for pod in self.v1.list_pod_for_all_namespaces().items:
             # if pod is running, it is assigned to node
             if pod.status.phase == 'Running':
@@ -227,17 +227,18 @@ class Scheduler:
         :param str namespace_: namespace of deployment
         :return str: return http response code
         """
-
-        #TODO check corectness of passed params
-
         url = '/apis/extensions/v1beta1/namespaces/' + namespace_ + '/deployments/' + name_
         headers = {'Accept': 'application/json', 'Content-Type': 'application/strategic-merge-patch+json'}
         body = {"spec":{"template":{"spec":{"schedulerName": scheduler_name_}}}}
-        api_client = client.ApiClient()
-        response = api_client.call_api(url, 'PATCH', header_params = headers, body = body)
 
-        print(response[1])
-        return
+        api_client = client.ApiClient()
+        response = []
+        try:
+            response = api_client.call_api(url, 'PATCH', header_params = headers, body = body)
+        except Exception as e:
+            return int(str(e)[1:4])
+
+        return response[1]
 
 
 def main():

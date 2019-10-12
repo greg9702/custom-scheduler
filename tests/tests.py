@@ -3,6 +3,8 @@ import os
 import sys
 import unittest
 import json
+from urllib3.response import HTTPHeaderDict
+from kubernetes.client.rest import ApiException
 
 from unittest.mock import patch
 from kubernetes import client
@@ -28,6 +30,8 @@ class testClass(unittest.TestCase):
         except BaseException as e:
             print('Error occured!', str(e))
             sys.exit(-1)
+
+        self.mocked_deployments = {'namespace': 'default', 'deployment_name': ('test_deploy_1', 'test_deploy_2')}
 
         self.patcher1 = patch('kubernetes.client.CoreV1Api.list_node')
         self.mock_list_nodes = self.patcher1.start()
@@ -96,13 +100,13 @@ class testClass(unittest.TestCase):
         sched.podsOnNodes()
 
         for node in sched.all_nodes:
-            if node.metadata.name == 'control-plane':
+            if node.metadata.name == 'worker-node':
                 self.assertNotEqual(node.pods.items, [])
-                self.assertEqual(node.pods.items[0].metadata.name, 'test_pod_1')
-                self.assertEqual(node.pods.items[0].spec.containers[0].name , 'container_1')
+                self.assertEqual(node.pods.items[1].metadata.name, 'test_pod_3')
+                self.assertEqual(node.pods.items[1].spec.containers[0].name , 'container_1')
                 # TODO test when request == {}
             if node.metadata.name == 'worker-node':
-                self.assertEqual(node.pods.items, [])
+                self.assertEqual(len(node.pods.items), 2)
 
         return
 
@@ -118,62 +122,79 @@ class testClass(unittest.TestCase):
 
         self.assertEqual(sched.podUsage(self.pods_list.items[0].metadata.name, self.pods_list.items[0].metadata.namespace)['cpu'], '1000000n')
         self.assertEqual(sched.podUsage(self.pods_list.items[1].metadata.name, self.pods_list.items[1].metadata.namespace)['memory'], '9000Ki')
-        self.assertEqual(self.pods_list.items[2].metadata.name, 'test_pod_3_0_usage_test')
+        self.assertEqual(self.pods_list.items[2].metadata.name, 'test_pod_3')
         self.assertEqual(sched.podUsage(self.pods_list.items[2].metadata.name, self.pods_list.items[2].metadata.namespace)['memory'], '0Ki')
         return
 
-    # def test_pass_to_scheduler(self):
-    #     """
-    #     Test if pass to scheduler works properly
-    #
-    #     :return:
-    #     """
-    #     self.mock_list_nodes.return_value = self.nodes_list
-    #     self.mocked_binding.return_value = None
-    #     self.mocked_call_api.side_effect = self.call_api_side_effect
-    #     self.mocked_all_pods.return_value = self.pods_list
-    #     sched = Scheduler()
-    #
-    #
-    #     return
+    def test_pass_to_scheduler(self):
+        """
+        Test if pass to scheduler works properly
+        """
+        self.mock_list_nodes.return_value = self.nodes_list
+        self.mocked_binding.return_value = None
+        self.mocked_call_api.side_effect = self.call_api_side_effect
+        self.mocked_all_pods.return_value = self.pods_list
 
-    def call_api_side_effect(self, metrics_url, attr='GET', _preload_content=None):
+        sched = Scheduler()
+        self.assertEqual(sched.passToScheduler('test_deploy_1', 'default'), 200)
+        self.assertEqual(sched.passToScheduler('non-existing', 'default'), 404)
+        return
+
+    def call_api_side_effect(self, url, attr='GET', header_params = None, _preload_content = None, body = None):
         """
         Side effect function for get usage of a pod,
         return string tmpHttpObj, same api_client.call_api() method
         """
-
         test_nodes_list = self.nodes_list
         test_pods_list = self.pods_list
 
-        # TODO make this reusable....
-        class tmpHttpObj():
-            def __init__(self):
-                if metrics_url.split('/')[-2] == 'nodes':
-                    node_name = metrics_url.split('/')[-1]
-                    self.tmp = ''
-                    self.data = b''
-                    for node in test_nodes_list.items:
-                        if node.metadata.name == node_name:
-                            cpu = node.usage['cpu']
-                            memory = node.usage['memory']
-                            self.tmp ='''{"usage":{"cpu":"''' + str(cpu) + '''","memory":"''' + str(memory) + '''"}}\n'''
-                            self.data = bytes(self.tmp, 'utf-8')
+        if url.split('/')[2] == 'metrics.k8s.io':
+            class tmpHttpObj():
+                def __init__(self):
+                    if url.split('/')[-2] == 'nodes':
+                        node_name = url.split('/')[-1]
+                        self.tmp = ''
+                        self.data = b''
+                        for node in test_nodes_list.items:
+                            if node.metadata.name == node_name:
+                                cpu = node.usage['cpu']
+                                memory = node.usage['memory']
+                                self.tmp = '''{"usage":{"cpu":"''' + str(cpu) + '''","memory":"''' + str(
+                                    memory) + '''"}}\n'''
+                                self.data = bytes(self.tmp, 'utf-8')
 
-                if metrics_url.split('/')[-2] == 'pods':
-                    pod_name = metrics_url.split('/')[-1]
-                    pod_namespace = metrics_url.split('/')[-3]
-                    self.tmp = ''
-                    self.data = b''
-                    for pod in test_pods_list.items:
-                        if pod.metadata.name == pod_name:
-                            self.tmp = {'containers': []}
-                            for cont in pod.spec.containers:
-                                cpu = cont.usage['cpu']
-                                memory = cont.usage['memory']
-                                self.tmp['containers'].append({"usage": {"cpu": str(cpu),"memory": str(memory)}})
-                            string_tmp = json.dumps(self.tmp)
-                            self.data = bytes(string_tmp, 'utf-8')
+                    if url.split('/')[-2] == 'pods':
+                        pod_name = url.split('/')[-1]
+                        pod_namespace = url.split('/')[-3]
+                        self.tmp = ''
+                        self.data = b''
+                        for pod in test_pods_list.items:
+                            if pod.metadata.name == pod_name:
+                                self.tmp = {'containers': []}
+                                for cont in pod.spec.containers:
+                                    cpu = cont.usage['cpu']
+                                    memory = cont.usage['memory']
+                                    self.tmp['containers'].append({"usage": {"cpu": str(cpu), "memory": str(memory)}})
+                                string_tmp = json.dumps(self.tmp)
+                                self.data = bytes(string_tmp, 'utf-8')
 
-        retobj = tmpHttpObj()
-        return [retobj]
+            retobj = tmpHttpObj()
+            return [retobj]
+
+        if url.split('/')[2] == 'extensions':
+            # TODO do not have any info about deployment right now
+            deployment_name = url.split('/')[7]
+            namespace = url.split('/')[5]
+
+            if namespace == self.mocked_deployments['namespace']:
+                for name in self.mocked_deployments['deployment_name']:
+                    print(name)
+                    if name == deployment_name:
+                        tmp = list()
+                        tmp.append(None)
+                        tmp.append(200)
+                        tmp.append(HTTPHeaderDict(
+                            {'Content-Type': 'application/json', 'Date': 'Sat, 12 Oct 2019 14:15:57 GMT',
+                             'Transfer-Encoding': 'chunked'}))
+                        return tmp
+            raise ApiException(404)

@@ -14,9 +14,10 @@ spec:
       labels:
         app: load2
     spec:
+      schedulerName: "abc-scheduler"
       containers:
         - name: abc
-          image: load:2029645
+          image: load:0.1
           imagePullPolicy: Never
           # resources:
             # requests:
