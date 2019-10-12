@@ -47,7 +47,9 @@ class testClass(unittest.TestCase):
         return
 
     def test_init(self):
-        """Test if initialization works fine and if nodes are empty."""
+        """
+        Test if initialization works fine and if nodes are empty.
+        """
 
         sched = Scheduler()
         self.assertEqual(sched.scheduler_name, 'custom_scheduler')
@@ -56,13 +58,15 @@ class testClass(unittest.TestCase):
         return
 
     def test_update_nodes(self):
-        """Test updateNodes and getNodeUsage methods.
+        """
+        Test updateNodes and getNodeUsage methods.
         On this stage scheduler have all static and dynamic (usage)
-        data of all nodes."""
+        data of all nodes.
+        """
 
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
-        self.mocked_call_api.side_effect = self.getUsageSideEffect
+        self.mocked_call_api.side_effect = self.call_api_side_effect
 
         sched = Scheduler()
         sched.updateNodes()
@@ -77,12 +81,14 @@ class testClass(unittest.TestCase):
         return
 
     def test_pods_on_nodes(self):
-        """Test podsOnNodes method.
-        Check if all pods were added correctly to nodes"""
+        """
+        Test podsOnNodes method.
+        Check if all pods were added correctly to nodes
+        """
 
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
-        self.mocked_call_api.side_effect = self.getUsageSideEffect
+        self.mocked_call_api.side_effect = self.call_api_side_effect
         self.mocked_all_pods.return_value = self.pods_list
 
         sched = Scheduler()
@@ -101,11 +107,12 @@ class testClass(unittest.TestCase):
         return
 
     def test_pod_usage(self):
-        """Check if pod usage is calculated correctly."""
-
+        """
+        Check if pod usage is calculated correctly.
+        """
         self.mock_list_nodes.return_value = self.nodes_list
         self.mocked_binding.return_value = None
-        self.mocked_call_api.side_effect = self.getUsageSideEffect
+        self.mocked_call_api.side_effect = self.call_api_side_effect
         self.mocked_all_pods.return_value = self.pods_list
         sched = Scheduler()
 
@@ -115,13 +122,31 @@ class testClass(unittest.TestCase):
         self.assertEqual(sched.podUsage(self.pods_list.items[2].metadata.name, self.pods_list.items[2].metadata.namespace)['memory'], '0Ki')
         return
 
-    def getUsageSideEffect(self, metrics_url, attr='GET', _preload_content=None):
-        """Side effect function for get usage of a pod,
-        return string tmpHttpObj, same api_client.call_api() method"""
+    # def test_pass_to_scheduler(self):
+    #     """
+    #     Test if pass to scheduler works properly
+    #
+    #     :return:
+    #     """
+    #     self.mock_list_nodes.return_value = self.nodes_list
+    #     self.mocked_binding.return_value = None
+    #     self.mocked_call_api.side_effect = self.call_api_side_effect
+    #     self.mocked_all_pods.return_value = self.pods_list
+    #     sched = Scheduler()
+    #
+    #
+    #     return
+
+    def call_api_side_effect(self, metrics_url, attr='GET', _preload_content=None):
+        """
+        Side effect function for get usage of a pod,
+        return string tmpHttpObj, same api_client.call_api() method
+        """
 
         test_nodes_list = self.nodes_list
         test_pods_list = self.pods_list
 
+        # TODO make this reusable....
         class tmpHttpObj():
             def __init__(self):
                 if metrics_url.split('/')[-2] == 'nodes':
