@@ -5,3 +5,5 @@ pkg/*/kind-config
 sandbox
 venv
 .vscode
+.idea/*
+.idea
