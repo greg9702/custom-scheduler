@@ -1,15 +1,11 @@
 #!/usr/bin/python
 
 import time
-import random
 import json
-import sys
 import os
-import copy
 
-
-from pprint import pprint
 from kubernetes import client, config, watch
+
 
 class Scheduler:
     def __init__(self):
@@ -37,36 +33,22 @@ class Scheduler:
         """
 
         print('Scheduler running')
-        self.updateNodes()
+        self.update_nodes()
         self.podsOnNodes()
-        # for item in self.all_nodes[0].pods.items:
-        #     print(item.metadata.name)
-        self.passToScheduler('load2', 'defaul432t')
 
-        # try:
-        #     print(self.all_nodes[1].pods.items[0].metadata.name, self.all_nodes[1].pods.items[0].spec.containers[0].resources.requests['cpu'])
-        # except Exception as e:
-        #     print('Do not show argument')
-        # return
+        # try: print(self.all_nodes[1].pods.items[0].metadata.name, self.all_nodes[1].pods.items[0].spec.containers[
+        # 0].resources.requests['cpu']) except Exception as e: print('Do not show argument') return
 
-        # try:
-        #     w = watch.Watch()
-        #     for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all namespaces
-        #         print("Event happened")
-        #         self.updateNodes()
-        #         print("Used scheduler: " + event['object'].spec.scheduler_name)
-        #         print ("Scheduling pod: ", event['object'].metadata.name)
-        #         if event['object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name:
-        #             try:
-        #                 print ("Scheduling pod: ", event['object'].metadata.name)
-        #                 res = self.bindToNode(event['object'].metadata.name, self.scoreNodes())
-        #             except client.rest.ApiException as e:
-        #                 print (json.loads(e.body)['message'])
-        # except Exception as e:
-        #     print(str(e))
+        # try: w = watch.Watch() for event in w.stream(self.v1.list_namespaced_pod, "default"): # TODO watch all
+        #  namespaces print("Event happened") self.updateNodes() print("Used scheduler: " + event[
+        #  'object'].spec.scheduler_name) print ("Scheduling pod: ", event['object'].metadata.name) if event[
+        #  'object'].status.phase == "Pending" and event['object'].spec.scheduler_name == self.scheduler_name: try:
+        #  print ("Scheduling pod: ", event['object'].metadata.name) res = self.bindToNode(event[
+        #  'object'].metadata.name, self.scoreNodes()) except client.rest.ApiException as e: print (json.loads(
+        #  e.body)['message']) except Exception as e: print(str(e))
         return
 
-    def updateNodes(self):
+    def update_nodes(self):
         """
         Update nodes in self.all_nodes.
         to retrive all the data

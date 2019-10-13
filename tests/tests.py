@@ -20,13 +20,15 @@ class testClass(unittest.TestCase):
     def setUp(self):
         creat = creator.Creator()
         try:
-            self.nodes_list = creat.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/node_01.template'), 'Node')
+            self.nodes_list = creat.create_from_file(
+                os.path.join(os.path.dirname(__file__), 'scenario_01/node_01.template'), 'Node')
         except BaseException as e:
             print('Error occured!', str(e))
             sys.exit(-1)
 
         try:
-            self.pods_list = creat.create_from_file(os.path.join(os.path.dirname(__file__), 'scenario_01/pods_01.template'), 'Pod')
+            self.pods_list = creat.create_from_file(
+                os.path.join(os.path.dirname(__file__), 'scenario_01/pods_01.template'), 'Pod')
         except BaseException as e:
             print('Error occured!', str(e))
             sys.exit(-1)
@@ -73,14 +75,14 @@ class testClass(unittest.TestCase):
         self.mocked_call_api.side_effect = self.call_api_side_effect
 
         sched = Scheduler()
-        sched.updateNodes()
+        sched.update_nodes()
 
         self.assertNotEqual(sched.all_nodes, [])
-        self.assertEqual(sched.all_nodes[0].metadata.name , 'control-plane')
-        self.assertEqual(sched.all_nodes[1].metadata.name , 'worker-node')
+        self.assertEqual(sched.all_nodes[0].metadata.name, 'control-plane')
+        self.assertEqual(sched.all_nodes[1].metadata.name, 'worker-node')
         self.assertEqual(sched.all_nodes[0].pods.items, [])
-        self.assertEqual(sched.all_nodes[0].usage , {"cpu":"200000000n","memory":"2000000Ki"})
-        self.assertEqual(sched.all_nodes[1].usage , {"cpu":"300000000n","memory":"3000000Ki"})
+        self.assertEqual(sched.all_nodes[0].usage, {"cpu": "200000000n", "memory": "2000000Ki"})
+        self.assertEqual(sched.all_nodes[1].usage, {"cpu": "300000000n", "memory": "3000000Ki"})
 
         return
 
@@ -96,14 +98,14 @@ class testClass(unittest.TestCase):
         self.mocked_all_pods.return_value = self.pods_list
 
         sched = Scheduler()
-        sched.updateNodes()
+        sched.update_nodes()
         sched.podsOnNodes()
 
         for node in sched.all_nodes:
             if node.metadata.name == 'worker-node':
                 self.assertNotEqual(node.pods.items, [])
                 self.assertEqual(node.pods.items[1].metadata.name, 'test_pod_3')
-                self.assertEqual(node.pods.items[1].spec.containers[0].name , 'container_1')
+                self.assertEqual(node.pods.items[1].spec.containers[0].name, 'container_1')
                 # TODO test when request == {}
             if node.metadata.name == 'worker-node':
                 self.assertEqual(len(node.pods.items), 2)
@@ -120,10 +122,16 @@ class testClass(unittest.TestCase):
         self.mocked_all_pods.return_value = self.pods_list
         sched = Scheduler()
 
-        self.assertEqual(sched.podUsage(self.pods_list.items[0].metadata.name, self.pods_list.items[0].metadata.namespace)['cpu'], '1000000n')
-        self.assertEqual(sched.podUsage(self.pods_list.items[1].metadata.name, self.pods_list.items[1].metadata.namespace)['memory'], '9000Ki')
+        self.assertEqual(
+            sched.podUsage(self.pods_list.items[0].metadata.name, self.pods_list.items[0].metadata.namespace)['cpu'],
+            '1000000n')
+        self.assertEqual(
+            sched.podUsage(self.pods_list.items[1].metadata.name, self.pods_list.items[1].metadata.namespace)['memory'],
+            '9000Ki')
         self.assertEqual(self.pods_list.items[2].metadata.name, 'test_pod_3')
-        self.assertEqual(sched.podUsage(self.pods_list.items[2].metadata.name, self.pods_list.items[2].metadata.namespace)['memory'], '0Ki')
+        self.assertEqual(
+            sched.podUsage(self.pods_list.items[2].metadata.name, self.pods_list.items[2].metadata.namespace)['memory'],
+            '0Ki')
         return
 
     def test_pass_to_scheduler(self):
@@ -140,7 +148,7 @@ class testClass(unittest.TestCase):
         self.assertEqual(sched.passToScheduler('non-existing', 'default'), 404)
         return
 
-    def call_api_side_effect(self, url, attr='GET', header_params = None, _preload_content = None, body = None):
+    def call_api_side_effect(self, url, attr='GET', header_params=None, _preload_content=None, body=None):
         """
         Side effect function for get usage of a pod,
         return string tmpHttpObj, same api_client.call_api() method
@@ -188,7 +196,6 @@ class testClass(unittest.TestCase):
 
             if namespace == self.mocked_deployments['namespace']:
                 for name in self.mocked_deployments['deployment_name']:
-                    print(name)
                     if name == deployment_name:
                         tmp = list()
                         tmp.append(None)
