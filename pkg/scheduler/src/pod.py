@@ -9,11 +9,23 @@ class PodList(object):
 
 
 class Pod(object):
-    def __init__(self):
-        self.metadata = client.models.V1ObjectMeta()
-        self.spec = client.models.V1PodSpec(containers=[])
-        self.status = client.models.V1PodStatus()
-        # [tuple(cpu_usage, mem_usage)]
+    def __init__(self, metadata_, spec_, status_):
+        """
+        :param V1ObjectMeta metadata_:
+        :param V1NodeSpec spec_:
+        :param V1NodeStatus status_:
+        :return:
+        """
+        if type(metadata_) is not client.models.v1_object_meta.V1ObjectMeta:
+            raise str("Passed invalid type")
+        if type(spec_) is not client.models.V1PodSpec:
+            raise str("Passed invalid type")
+        if type(status_) is not client.models.V1PodStatus:
+            raise str("Passed invalid type")
+
+        self.metadata = metadata_
+        self.spec = spec_
+        self.status = status_
         self.usage = list()
 
     def fetch_usage(self):
@@ -25,6 +37,7 @@ class Pod(object):
                       + self.metadata.namespace + '/pods/' \
                       + self.metadata.name
 
+        #print(metrics_url)
         api_client = client.ApiClient()
         response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
 
@@ -53,7 +66,6 @@ class Pod(object):
         Get usage calculated based on Pod statistics
         :return dict: dict('cpu': cpu_usage, 'memory': memory_usage)
         """
-
         avg_cpu = sum(self.usage['cpu']) / len(self.usage['cpu'])
         avg_mem = sum(self.usage['memory']) / len(self.usage['memory'])
 
