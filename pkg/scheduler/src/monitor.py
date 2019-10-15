@@ -11,7 +11,7 @@ from multiprocessing import Process
 class ClusterMonitor:
     """
     Build full view of cluster, periodically update
-    info about Nodes runtime resources usage, use this
+    info about Pods runtime resources usage, use this
     as statistics, to use average value instead of
     instantaneous value
     """
@@ -48,7 +48,8 @@ class ClusterMonitor:
         """
         while True:
             self.update_pods()
-            time.sleep(5)
+            time.sleep(3)
+            print(self.all_pods[0].get_usage())
 
     def update_pods(self):
         """
@@ -59,25 +60,32 @@ class ClusterMonitor:
         self.pods_not_to_garbage = []
         for pod_ in self.v1.list_pod_for_all_namespaces().items:
 
-            pod_already_exists = False
+            skip = False
 
             for pod in self.all_pods:
                 if pod_.metadata.name == pod.metadata.name and pod_.status.phase == 'Running':
                     # found in collection, so update its usage
-                    pod.fetch_usage()
+                    res = pod.fetch_usage()
+                    if res != 0:
+                        skip = True
+                        if res == 404:
+                            print('Metrics not found for pod %s skipping...' % pod.metadata.name)
+                            self.pods_not_to_garbage.append(pod.metadata.name)
+                        else:
+                            print('Unknown Error')
+                        break
                     print('Updated Pod %s' % pod.metadata.name)
                     self.pods_not_to_garbage.append(pod.metadata.name)
-                    pod_already_exists = True
+                    skip = True
                     break
 
-            if not pod_already_exists:
+            if not skip:
                 # this is new pod, add it to
                 pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
                 print('Added Pod %s' % pod.metadata.name)
                 self.pods_not_to_garbage.append(pod.metadata.name)
                 self.all_pods.append(pod)
 
-        # collect dead Pods
         self.garbage_old_pods()
 
     def garbage_old_pods(self):
