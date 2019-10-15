@@ -22,6 +22,10 @@ More about kind you can read [here](https://kind.sigs.k8s.io/).
 - [x] automate process of creating cluster - make script <br>
 - [x] automate deployment  				<br>
 - [x] make cluster monitoring system working <br>
+- [x] Monitor build full view of Pods
+- [ ] Full view of Nodes
+- [ ] Add locks - prepare for multithreading
+- [ ] Implement Pods garbage collector
 
 #### __Updates__
 Working on tests and test environment. <br>
