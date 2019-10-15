@@ -36,13 +36,15 @@ class Pod(object):
         metrics_url = '/apis/metrics.k8s.io/v1beta1/namespaces/' \
                       + self.metadata.namespace + '/pods/' \
                       + self.metadata.name
+        try:
 
-        #print(metrics_url)
-        api_client = client.ApiClient()
-        response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
+            api_client = client.ApiClient()
+            response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
 
-        resp = response[0].data.decode('utf-8')
-        json_data = json.loads(resp)
+            resp = response[0].data.decode('utf-8')
+            json_data = json.loads(resp)
+        except Exception as e:
+            return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
         tmp_mem = 0
@@ -61,12 +63,25 @@ class Pod(object):
 
         self.usage.append(dict({'cpu': tmp_cpu, 'memory': tmp_mem}))
 
+        return 0
+
     def get_usage(self):
         """
         Get usage calculated based on Pod statistics
+        TODO round this value
         :return dict: dict('cpu': cpu_usage, 'memory': memory_usage)
         """
-        avg_cpu = sum(self.usage['cpu']) / len(self.usage['cpu'])
-        avg_mem = sum(self.usage['memory']) / len(self.usage['memory'])
+        sum_cpu = 0
+        sum_mem = 0
+        if len(self.usage) > 0:
+            for entry in self.usage:
+                sum_cpu += entry['cpu']
+                sum_mem += entry['memory']
 
-        return dict({'cpu': avg_cpu, 'memory': avg_mem})
+            avg_cpu = sum_cpu / len(self.usage)
+            avg_mem = sum_mem / len(self.usage)
+            print('length', len(self.usage))
+            return dict({'cpu': avg_cpu, 'memory': avg_mem})
+
+        else:
+            return dict({'cpu': 0, 'memory': 0})
