@@ -71,6 +71,7 @@ class ClusterMonitor:
                         if res == 404:
                             print('Metrics not found for pod %s skipping...' % pod.metadata.name)
                             self.pods_not_to_garbage.append(pod.metadata.name)
+                            pod.usage = dict({'cpu': 0, 'memory': 0})
                         else:
                             print('Unknown Error')
                         break
