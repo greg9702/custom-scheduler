@@ -37,7 +37,6 @@ class Pod(object):
                       + self.metadata.namespace + '/pods/' \
                       + self.metadata.name
         try:
-
             api_client = client.ApiClient()
             response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
 
@@ -80,7 +79,6 @@ class Pod(object):
 
             avg_cpu = sum_cpu / len(self.usage)
             avg_mem = sum_mem / len(self.usage)
-            print('length', len(self.usage))
             return dict({'cpu': avg_cpu, 'memory': avg_mem})
 
         else:
