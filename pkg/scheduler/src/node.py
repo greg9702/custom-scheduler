@@ -29,12 +29,12 @@ class Node(object):
         self.spec = spec_
         self.status = status_
 
-    def update_node(self):
+    def update_node(self, pod_list):
         """
         Update Node Pods and usage attributes
         :return:
         """
-        self.pods = self.get_pods_on_node()
+        self.pods = self.get_pods_on_node(pod_list)
         self.usage = self.get_node_usage()
 
     def get_node_usage(self):
@@ -46,20 +46,20 @@ class Node(object):
         memory = 0
         cpu = 0
         for pod in self.pods.items:
-            memory += pod.usage['memory']
-            cpu += pod.usage['cpu']
+            memory += pod.get_usage()['memory']
+            cpu += pod.get_usage()['cpu']
 
         return dict({'cpu': cpu, 'memory': memory})
 
-    def get_pods_on_node(self):
+    def get_pods_on_node(self, pod_list):
         """
         Browse all avaliable Pods in cluster and
         assign them to Node
         :return PodList:
         """
         result = PodList()
-        # search through all Pods and append this Pods
-        # which have Node.metadata.name == Pod.spec.node_name
-
+        for pod in pod_list:
+            if pod.spec.node_name == self.metadata.name:
+                result.items.append(pod)
 
         return result
