@@ -5,7 +5,8 @@ import os
 from kubernetes import client, config
 from node import Node, NodeList
 from pod import PodList, Pod
-from multiprocessing import Process
+from threading import Thread, Lock
+from time import sleep
 
 
 class ClusterMonitor:
@@ -16,18 +17,13 @@ class ClusterMonitor:
     instantaneous value
     """
     def __init__(self):
+        self.status_lock = Lock()
+
         config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
         self.v1 = client.CoreV1Api()
 
         self.all_pods = []
-        self.hard_update_counter = 0 # when counter reach high value update whole pod info
-
-        # {'Pod Name' : (Pod cpu usage, Pod memory usage)}
-        self.monitor_pods_data = dict()
-
-        # store all V1Node objects which represents Nodes in cluster
         self.all_nodes = []
-
         self.pods_not_to_garbage = list()
 
     def update_nodes(self):
@@ -36,10 +32,16 @@ class ClusterMonitor:
         then starts to add rest of attributes
         :return:
         """
+        self.status_lock.acquire(blocking=True)
+        print('Updating nodes')
         for node_ in self.v1.list_node().items:
             node = Node(node_.metadata, node_.spec, node_.status)
-            node.update_node()
+            node.update_node(self.all_pods)
             self.all_nodes.append(node)
+            print(node.metadata.name + ' ' + str(len(node.pods.items)))
+            print(node.usage)
+
+        self.status_lock.release()
 
     def monitor_runner(self):
         """
@@ -49,7 +51,6 @@ class ClusterMonitor:
         while True:
             self.update_pods()
             time.sleep(3)
-            print(self.all_pods[0].get_usage())
 
     def update_pods(self):
         """
@@ -57,6 +58,7 @@ class ClusterMonitor:
         to self.monitor_pods_data
         :return:
         """
+        self.status_lock.acquire(blocking=True)
         self.pods_not_to_garbage = []
         for pod_ in self.v1.list_pod_for_all_namespaces().items:
 
@@ -69,13 +71,11 @@ class ClusterMonitor:
                     if res != 0:
                         skip = True
                         if res == 404:
-                            print('Metrics not found for pod %s skipping...' % pod.metadata.name)
                             self.pods_not_to_garbage.append(pod.metadata.name)
                             pod.usage = dict({'cpu': 0, 'memory': 0})
                         else:
                             print('Unknown Error')
                         break
-                    print('Updated Pod %s' % pod.metadata.name)
                     self.pods_not_to_garbage.append(pod.metadata.name)
                     skip = True
                     break
@@ -83,10 +83,9 @@ class ClusterMonitor:
             if not skip:
                 # this is new pod, add it to
                 pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
-                print('Added Pod %s' % pod.metadata.name)
                 self.pods_not_to_garbage.append(pod.metadata.name)
                 self.all_pods.append(pod)
-
+        self.status_lock.release()
         self.garbage_old_pods()
 
     def garbage_old_pods(self):
@@ -97,6 +96,7 @@ class ClusterMonitor:
         """
         for pod in self.all_pods:
             if pod.metadata.name not in self.pods_not_to_garbage:
+                pass
                 # TODO implement garbage collector
                 print('Pod %s should be deleted' % pod.metadata.name)
 
@@ -107,11 +107,28 @@ class ClusterMonitor:
         """
         pass
 
+    def read_async(self):
+        """
+        Mock function for tests only,
+        self.update_nodes() will be called when
+        event happened in scheduler.event_monitor
+        :return:
+        """
+        while True:
+            # event happened
+            monitor.update_nodes()
+            sleep(5)
+
 
 if __name__ == '__main__':
     print('Running')
     monitor = ClusterMonitor()
-    p = Process(target=monitor.monitor_runner())
-    p.start()
-    p.join()
 
+    p1 = Thread(target=monitor.monitor_runner)
+    p2 = Thread(target=monitor.read_async)
+
+    p2.start()
+    p1.start()
+
+    p1.join()
+    p2.join()
