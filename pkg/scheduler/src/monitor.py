@@ -108,11 +108,9 @@ class ClusterMonitor:
         i = 0
         for pod in self.all_pods:
             if pod.metadata.name not in self.pods_not_to_garbage:
-                pass
-                # TODO implement garbage collector
-                print(i)
-                i+=1
+                # TODO implement this
                 print('Pod %s should be deleted' % pod.metadata.name)
+
 
     def monitor_nodes(self):
         """
