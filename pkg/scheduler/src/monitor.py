@@ -53,7 +53,9 @@ class ClusterMonitor:
         Run Pod monitor
         :return:
         """
+        print('Monitor runner started')
         while True:
+            print('monitor tick')
             self.update_pods()
             time.sleep(self.time_interval)
 
@@ -76,11 +78,13 @@ class ClusterMonitor:
                     if res != 0:
                         skip = True
                         if res == 404:
+                            print('Metrics for pod %s not found ' % pod.metadata.name)
                             self.pods_not_to_garbage.append(pod.metadata.name)
-                            pod.usage = dict({'cpu': 0, 'memory': 0})
+                            pod.usage = list(dict({'cpu': 0, 'memory': 0}))
                         else:
                             print('Unknown Error')
                         break
+                    print('Updated metrics for pod %s' % pod.metadata.name)
                     self.pods_not_to_garbage.append(pod.metadata.name)
                     skip = True
                     break
@@ -89,6 +93,8 @@ class ClusterMonitor:
                 # this is new pod, add it to
                 pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
                 self.pods_not_to_garbage.append(pod.metadata.name)
+                print('Added pod ' + pod.metadata.name)
+                print(len(self.all_pods))
                 self.all_pods.append(pod)
         self.status_lock.release()
         self.garbage_old_pods()
@@ -99,10 +105,13 @@ class ClusterMonitor:
         do not appeared in API response
         :return:
         """
+        i = 0
         for pod in self.all_pods:
             if pod.metadata.name not in self.pods_not_to_garbage:
                 pass
                 # TODO implement garbage collector
+                print(i)
+                i+=1
                 print('Pod %s should be deleted' % pod.metadata.name)
 
     def monitor_nodes(self):
