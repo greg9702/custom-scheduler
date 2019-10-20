@@ -2,9 +2,9 @@ from kubernetes import client
 
 import json
 
-limit_of_records = 1000
+LIMIT_OF_RECORDS = 1000
 
-mix_metrics = False
+MIX_METRICS = False
 
 
 class PodList(object):
@@ -60,7 +60,7 @@ class Pod(object):
             if container['usage']['cpu'] != '0':
                 tmp_cpu += int(container['usage']['cpu'][:-1])
 
-        if len(self.usage) > limit_of_records:
+        if len(self.usage) > LIMIT_OF_RECORDS:
             self.usage.pop(0)
 
         self.usage.append(dict({'cpu': tmp_cpu, 'memory': tmp_mem}))
@@ -76,7 +76,7 @@ class Pod(object):
         sum_cpu = 0
         sum_mem = 0
         if len(self.usage) > 0:
-            if not mix_metrics:
+            if not MIX_METRICS:
                 for entry in self.usage:
                     sum_cpu += entry['cpu']
                     sum_mem += entry['memory']
