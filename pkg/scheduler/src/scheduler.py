@@ -30,7 +30,8 @@ class Scheduler:
         while True:
             try:
                 # TODO watch all namespaces
-                for event in self.watcher.stream(self.v1.list_namespaced_pod, "default"):
+
+                for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
                     print('Event happened')
                     # TODO create Pod object from received event data
                     #self.monitor.update_nodes()
