@@ -16,7 +16,9 @@ from testenv import creator
 
 
 class testClass(unittest.TestCase):
-
+    """
+    Note: Tests are deprecated!!!
+    """
     def setUp(self):
         creat = creator.Creator()
         try:
