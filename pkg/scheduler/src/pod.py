@@ -32,6 +32,9 @@ class Pod(object):
         self.status = status_
         self.usage = list()
 
+    def __eq__(self, other):
+        return self.metadata.name == other.metadata.name
+
     def fetch_usage(self):
         """
         Fetch usage data for pod from metrics server
