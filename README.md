@@ -26,6 +26,7 @@ More about kind you can read [here](https://kind.sigs.k8s.io/).
 - [x] Full state of Nodes<br>
 - [x] Implement monitor.update_nodes() method<br>
 - [x] Add locks - prepare for multithreading<br>
+- [ ] Add comparator for Pod module<br>
 - [ ] Implement Pods garbage collector<br>
 - [ ] Implement scheduler module<br>
 
