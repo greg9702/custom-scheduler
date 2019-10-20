@@ -5,6 +5,7 @@ import json
 import os
 
 from time import sleep
+from threading import Thread, Lock
 
 from monitor import ClusterMonitor
 from node import Node, NodeList
@@ -27,21 +28,28 @@ class Scheduler:
         and proceed scoring and scheduling process.
         """
         print('Scheduler running')
+
+        p1 = Thread(target=self.monitor.monitor_runner)
+        p1.start()
+
         while True:
             try:
-                # TODO watch all namespaces
-
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
                     print('Event happened')
-                    # TODO create Pod object from received event data
-                    #self.monitor.update_nodes()
+                    if event['type'] == 'ADDED':
+                        # run scheduling process...
+                        print('New pod' + event['object'].metadata.name)
+                        # TODO create Pod object from received event data here
+                        self.monitor.update_nodes()
 
-                    #selected_node = self.choose_node()
-                    print('Used scheduler: ' + event['object'].spec.scheduler_name)
-                    print("Scheduling pod: ", event['object'].metadata.name)
+                        # selected_node = self.choose_node()
+                        print('Used scheduler: ' + event['object'].spec.scheduler_name)
+                        print("Scheduling pod: ", event['object'].metadata.name)
             except Exception as e:
                 print(str(e))
             sleep(5)
+
+        p1.join()
 
     def choose_node(self, pod):
         """
@@ -51,8 +59,8 @@ class Scheduler:
         :return node.Node: return best selected Node for Pod,
             None if Pod cannot be scheduled
         """
-        filered_nodes = self.filter_nodes(pod)
-        selected_node = self.score_nodes(pod, filered_nodes)
+        filtered_nodes = self.filter_nodes(pod)
+        selected_node = self.score_nodes(pod, filtered_nodes)
 
         return selected_node
 
@@ -86,6 +94,22 @@ class Scheduler:
         :param str namespace: namespace of pod
         :return: True if pod was binded successfully, False otherwise
         """
+        # 2nd method TODO test it
+        # body = client.V1Binding()
+        #
+        # target = client.V1ObjectReference()
+        # target.kind = "Node"
+        # target.apiVersion = "v1"
+        # target.name = node
+        #
+        # meta = client.V1ObjectMeta()
+        # meta.name = name
+        #
+        # body.target = target
+        # body.metadata = meta
+        #
+        # return v1.create_namespaced_binding_binding(name, namespace, body)
+
         target = client.V1ObjectReference()
         target.kind = "Node"
         target.api_version = "v1"
