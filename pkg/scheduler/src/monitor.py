@@ -8,6 +8,8 @@ from pod import PodList, Pod
 from threading import Thread, Lock
 from time import sleep
 
+g_time_interval = 3
+
 
 class ClusterMonitor:
     """
@@ -18,6 +20,9 @@ class ClusterMonitor:
     """
     def __init__(self):
         self.status_lock = Lock()
+
+        # time interval is seconds to update Pods statistics
+        self.time_interval = g_time_interval
 
         config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
         self.v1 = client.CoreV1Api()
@@ -50,7 +55,7 @@ class ClusterMonitor:
         """
         while True:
             self.update_pods()
-            time.sleep(3)
+            time.sleep(self.time_interval)
 
     def update_pods(self):
         """
@@ -116,7 +121,7 @@ class ClusterMonitor:
         """
         while True:
             # event happened
-            monitor.update_nodes()
+            self.update_nodes()
             sleep(5)
 
 

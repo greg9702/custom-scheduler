@@ -2,6 +2,10 @@ from kubernetes import client
 
 import json
 
+limit_of_records = 1000
+
+mix_metrics = False
+
 
 class PodList(object):
     def __init__(self):
@@ -39,7 +43,6 @@ class Pod(object):
         try:
             api_client = client.ApiClient()
             response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
-
             resp = response[0].data.decode('utf-8')
             json_data = json.loads(resp)
         except Exception as e:
@@ -57,7 +60,7 @@ class Pod(object):
             if container['usage']['cpu'] != '0':
                 tmp_cpu += int(container['usage']['cpu'][:-1])
 
-        if len(self.usage) > 1000:
+        if len(self.usage) > limit_of_records:
             self.usage.pop(0)
 
         self.usage.append(dict({'cpu': tmp_cpu, 'memory': tmp_mem}))
@@ -73,13 +76,13 @@ class Pod(object):
         sum_cpu = 0
         sum_mem = 0
         if len(self.usage) > 0:
-            for entry in self.usage:
-                sum_cpu += entry['cpu']
-                sum_mem += entry['memory']
+            if not mix_metrics:
+                for entry in self.usage:
+                    sum_cpu += entry['cpu']
+                    sum_mem += entry['memory']
 
-            avg_cpu = sum_cpu / len(self.usage)
-            avg_mem = sum_mem / len(self.usage)
-            return dict({'cpu': avg_cpu, 'memory': avg_mem})
-
+                avg_cpu = sum_cpu / len(self.usage)
+                avg_mem = sum_mem / len(self.usage)
+                return dict({'cpu': avg_cpu, 'memory': avg_mem})
         else:
             return dict({'cpu': 0, 'memory': 0})
