@@ -1,5 +1,6 @@
 #### __Step by step cluster setup from scratch__
-<br>
+
+Im using Arch Linux system, so system commands are prepared for this system.<br>
 
 __Install go and kind using kind__
 ```
