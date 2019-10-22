@@ -10,7 +10,7 @@ The biggest advantage of this solution is lightweightness of a cluster. <br>
 We do not waste resources to run multiple OS, because every single node is [Docker](https://www.docker.com/) container, not VM. <br>
 More about kind you can read [here](https://kind.sigs.k8s.io/). <br>
 Tried also to setting up local cluster as couple virtual machines and installing <br>
-kubelet on them to create Kubernetes cluster, but it was <br>
+kubelet on them to create Kubernetes cluster, but it was pain in the neck.<br>
 
 
 > More in docs
