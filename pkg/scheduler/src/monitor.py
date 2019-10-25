@@ -66,7 +66,11 @@ class ClusterMonitor:
         :return:
         """
         self.status_lock.acquire(blocking=True)
-        self.pods_not_to_garbage = []
+
+        # set all pods as inactive
+        for pod in self.all_pods:
+            pod.is_alive = False
+
         for pod_ in self.v1.list_pod_for_all_namespaces().items:
 
             skip = False
@@ -79,20 +83,20 @@ class ClusterMonitor:
                         skip = True
                         if res == 404:
                             print('Metrics for pod %s not found ' % pod.metadata.name)
-                            self.pods_not_to_garbage.append(pod.metadata.name)
+                            pod.is_alive = True
                             pod.usage = list(dict({'cpu': 0, 'memory': 0}))
                         else:
                             print('Unknown Error')
                         break
                     print('Updated metrics for pod %s' % pod.metadata.name)
-                    self.pods_not_to_garbage.append(pod.metadata.name)
+                    pod.is_alive = True
                     skip = True
                     break
 
             if not skip:
                 # this is new pod, add it to
                 pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
-                self.pods_not_to_garbage.append(pod.metadata.name)
+                pod.is_alive = True
                 print('Added pod ' + pod.metadata.name)
                 print(len(self.all_pods))
                 self.all_pods.append(pod)
@@ -101,16 +105,15 @@ class ClusterMonitor:
 
     def garbage_old_pods(self):
         """
-        Collect dead pods from self.all_pods if Pod
-        do not appeared in API response
+        Remove dead pods from self.all_pods if Pod
+        do not appeared in API response,
+        dead Pods have self.is_alive set to False
         :return:
         """
         i = 0
         for pod in self.all_pods:
-            if pod.metadata.name not in self.pods_not_to_garbage:
-                # TODO implement this
+            if not pod.is_alive:
                 print('Pod %s should be deleted' % pod.metadata.name)
-
 
     def monitor_nodes(self):
         """
