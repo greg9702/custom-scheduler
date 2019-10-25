@@ -31,6 +31,7 @@ class Pod(object):
         self.spec = spec_
         self.status = status_
         self.usage = list()
+        self.is_alive = True
 
     def __eq__(self, other):
         return self.metadata.name == other.metadata.name
