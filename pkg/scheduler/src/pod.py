@@ -50,6 +50,7 @@ class Pod(object):
             resp = response[0].data.decode('utf-8')
             json_data = json.loads(resp)
         except Exception as e:
+            self.usage = list(dict({'cpu': 0, 'memory': 0}))
             return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
@@ -82,9 +83,10 @@ class Pod(object):
         if len(self.usage) > 0:
             if not MIX_METRICS:
                 for entry in self.usage:
-                    sum_cpu += entry['cpu']
-                    sum_mem += entry['memory']
-
+                    print('rewqfqew 1')
+                    sum_cpu += int(entry['cpu'])
+                    sum_mem += int(entry['memory'])
+                print('rewqfqew 2')
                 avg_cpu = sum_cpu / len(self.usage)
                 avg_mem = sum_mem / len(self.usage)
                 return dict({'cpu': avg_cpu, 'memory': avg_mem})

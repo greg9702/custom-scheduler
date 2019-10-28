@@ -38,7 +38,7 @@ class Scheduler:
                     print('Event happened')
                     if event['type'] == 'ADDED':
                         # run scheduling process...
-                        print('New pod' + event['object'].metadata.name)
+                        print('New pod ' + event['object'].metadata.name)
                         # TODO create Pod object from received event data here
                         self.monitor.update_nodes()
 

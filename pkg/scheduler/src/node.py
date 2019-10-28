@@ -46,8 +46,10 @@ class Node(object):
         memory = 0
         cpu = 0
         for pod in self.pods.items:
-            memory += pod.get_usage()['memory']
-            cpu += pod.get_usage()['cpu']
+            print('fdafsadfa 3')
+            memory += int(pod.get_usage()['memory'])
+            cpu += int(pod.get_usage()['cpu'])
+            print('fdafsadfa 4')
 
         return dict({'cpu': cpu, 'memory': memory})
 

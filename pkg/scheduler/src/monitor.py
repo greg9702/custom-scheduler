@@ -18,6 +18,7 @@ class ClusterMonitor:
     as statistics, to use average value instead of
     instantaneous value
     """
+
     def __init__(self):
         self.status_lock = Lock()
 
@@ -44,6 +45,7 @@ class ClusterMonitor:
             node.update_node(self.all_pods)
             self.all_nodes.append(node)
             print(node.metadata.name + ' ' + str(len(node.pods.items)))
+            print('here')
             print(node.usage)
 
         self.status_lock.release()
@@ -75,31 +77,35 @@ class ClusterMonitor:
 
             skip = False
 
-            for pod in self.all_pods:
-                if pod_.metadata.name == pod.metadata.name and pod_.status.phase == 'Running':
-                    # found in collection, so update its usage
-                    res = pod.fetch_usage()
-                    if res != 0:
-                        skip = True
-                        if res == 404:
-                            print('Metrics for pod %s not found ' % pod.metadata.name)
-                            pod.is_alive = True
-                            pod.usage = list(dict({'cpu': 0, 'memory': 0}))
-                        else:
-                            print('Unknown Error')
-                        break
-                    print('Updated metrics for pod %s' % pod.metadata.name)
-                    pod.is_alive = True
-                    skip = True
-                    break
+            if pod_.status.phase == 'Running':
+                for pod in self.all_pods:
+                    if pod_.metadata.name == pod.metadata.name:
+                        # found in collection, so update its usage
+                        skip = True  # skip creating new Pod
 
-            if not skip:
-                # this is new pod, add it to
-                pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
-                pod.is_alive = True
-                print('Added pod ' + pod.metadata.name)
-                print(len(self.all_pods))
-                self.all_pods.append(pod)
+                        res = pod.fetch_usage()
+                        pod.is_alive = True
+
+                        # TODO what to do when metrics reciving failed
+                        if res != 0:
+                            if res == 404:
+                                print('Metrics for pod %s not found ' % pod.metadata.name)
+                            else:
+                                print('Unknown Error')
+                            break
+
+                        print('Updated metrics for pod %s' % pod.metadata.name)
+
+                        break
+
+                if not skip:
+                    # this is new pod, add it to
+                    pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
+                    pod.is_alive = True
+                    print('Added pod ' + pod.metadata.name)
+                    print(len(self.all_pods))
+                    self.all_pods.append(pod)
+
         self.status_lock.release()
         self.garbage_old_pods()
 
@@ -110,10 +116,12 @@ class ClusterMonitor:
         dead Pods have self.is_alive set to False
         :return:
         """
-        i = 0
+        self.status_lock.acquire(blocking=True)
+        print('Length of pods_list %s' % len(self.all_pods))
         for pod in self.all_pods:
             if not pod.is_alive:
                 print('Pod %s should be deleted' % pod.metadata.name)
+        self.status_lock.release()
 
     def monitor_nodes(self):
         """
