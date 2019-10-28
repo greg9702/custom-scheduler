@@ -69,7 +69,7 @@ class ClusterMonitor:
         """
         self.status_lock.acquire(blocking=True)
 
-        # set all pods as inactive
+        # set all current pods as inactive
         for pod in self.all_pods:
             pod.is_alive = False
 
