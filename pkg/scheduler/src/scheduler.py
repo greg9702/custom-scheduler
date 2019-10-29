@@ -35,16 +35,11 @@ class Scheduler:
         while True:
             try:
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
-                    print('Event happened')
                     if event['type'] == 'ADDED':
-                        # run scheduling process...
                         print('New pod ' + event['object'].metadata.name)
                         # TODO create Pod object from received event data here
                         self.monitor.update_nodes()
-
-                        # selected_node = self.choose_node()
                         print('Used scheduler: ' + event['object'].spec.scheduler_name)
-                        print("Scheduling pod: ", event['object'].metadata.name)
             except Exception as e:
                 print(str(e))
             sleep(5)

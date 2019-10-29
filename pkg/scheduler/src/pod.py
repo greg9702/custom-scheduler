@@ -83,10 +83,8 @@ class Pod(object):
         if len(self.usage) > 0:
             if not MIX_METRICS:
                 for entry in self.usage:
-                    print('rewqfqew 1')
                     sum_cpu += int(entry['cpu'])
                     sum_mem += int(entry['memory'])
-                print('rewqfqew 2')
                 avg_cpu = sum_cpu / len(self.usage)
                 avg_mem = sum_mem / len(self.usage)
                 return dict({'cpu': avg_cpu, 'memory': avg_mem})

@@ -91,7 +91,7 @@ class ClusterMonitor:
                             if res == 404:
                                 print('Metrics for pod %s not found ' % pod.metadata.name)
                             else:
-                                print('Unknown Error')
+                                print('Unknown metrics server error %s' % res)
                             break
 
                         print('Updated metrics for pod %s' % pod.metadata.name)
