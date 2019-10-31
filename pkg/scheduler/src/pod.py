@@ -44,13 +44,18 @@ class Pod(object):
         metrics_url = '/apis/metrics.k8s.io/v1beta1/namespaces/' \
                       + self.metadata.namespace + '/pods/' \
                       + self.metadata.name
+
         try:
             api_client = client.ApiClient()
             response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
             resp = response[0].data.decode('utf-8')
             json_data = json.loads(resp)
         except Exception as e:
-            self.usage = list(dict({'cpu': 0, 'memory': 0}))
+            print('len of usage ', len(self.usage))
+            if len(self.usage) <= 1:
+                self.usage = list()
+                print('cleared usage list')
+            self.usage.append(dict({'cpu': 0, 'memory': 0}))
             return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
@@ -59,6 +64,7 @@ class Pod(object):
 
         # TODO check units of this...
         for container in json_data['containers']:
+            print('number of containters ', len(json_data['containers']))
             # when Pod is in Error state, it containers usage is returned as 0
             if container['usage']['memory'] != '0':
                 tmp_mem += int(container['usage']['memory'][:-2])
@@ -83,6 +89,7 @@ class Pod(object):
         if len(self.usage) > 0:
             if not MIX_METRICS:
                 for entry in self.usage:
+                    print(self.metadata.name, 'get usage ', self.usage)
                     sum_cpu += int(entry['cpu'])
                     sum_mem += int(entry['memory'])
                 avg_cpu = sum_cpu / len(self.usage)
