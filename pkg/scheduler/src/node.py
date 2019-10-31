@@ -48,7 +48,6 @@ class Node(object):
         for pod in self.pods.items:
             if pod.is_alive:
                 # there can be nodes not collected by garbage collector
-                print(pod.metadata.name)
                 memory += int(pod.get_usage()['memory'])
                 cpu += int(pod.get_usage()['cpu'])
 

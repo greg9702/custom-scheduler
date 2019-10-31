@@ -123,6 +123,7 @@ class Scheduler:
             print('exception' + str(e))
             return False
 
+    @staticmethod
     def pass_to_scheduler(self, name_, namespace_, scheduler_name_='default-scheduler'):
         """
         Pass deployment to be scheduled by different scheduler
