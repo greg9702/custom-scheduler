@@ -8,6 +8,7 @@ from pod import PodList, Pod
 from threading import Thread, Lock
 from time import sleep
 
+# refresh interval in seconds
 TIME_INTERVAL = 3
 
 
@@ -44,9 +45,7 @@ class ClusterMonitor:
             node = Node(node_.metadata, node_.spec, node_.status)
             node.update_node(self.all_pods)
             self.all_nodes.append(node)
-            print(node.metadata.name + ' ' + str(len(node.pods.items)))
-            print('here')
-            print(node.usage)
+            print(node.metadata.name, node.usage)
 
         self.status_lock.release()
 
@@ -85,7 +84,6 @@ class ClusterMonitor:
 
                         res = pod.fetch_usage()
                         pod.is_alive = True
-
                         # TODO what to do when metrics reciving failed
                         if res != 0:
                             if res == 404:
@@ -118,9 +116,10 @@ class ClusterMonitor:
         """
         self.status_lock.acquire(blocking=True)
         print('Length of pods_list %s' % len(self.all_pods))
-        for pod in self.all_pods:
+        for pod in self.all_pods[:]:
             if not pod.is_alive:
-                print('Pod %s should be deleted' % pod.metadata.name)
+                self.all_pods.remove(pod)
+                print('Pod %s deleted' % pod.metadata.name)
         self.status_lock.release()
 
     def monitor_nodes(self):
