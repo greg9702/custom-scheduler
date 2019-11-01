@@ -99,7 +99,7 @@ class ClusterMonitor:
                                 print('Unknown metrics server error %s' % res)
                             break
 
-                        #                        print('Updated metrics for pod %s' % pod.metadata.name)
+                        # print('Updated metrics for pod %s' % pod.metadata.name)
 
                         break
 
