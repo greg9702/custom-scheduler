@@ -9,6 +9,7 @@ from threading import Thread, Lock
 
 from monitor import ClusterMonitor
 from node import Node, NodeList
+from pod import Pod
 
 from kubernetes import client, config, watch
 
@@ -21,6 +22,8 @@ class Scheduler:
         config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
         self.v1 = client.CoreV1Api()
 
+        self.scheduler_name = 'my_scheduler'
+
     def run(self):
         """
         Main thread, run and listen for events,
@@ -32,14 +35,33 @@ class Scheduler:
         p1 = Thread(target=self.monitor.monitor_runner)
         p1.start()
 
+        # TODO add queue for pods to be scheduled
+        # 1st thread listen for events and add pods to deploy queue
+        # 2nd take pods from queue and schedule them, use mutex for synchronization
+        # TODO do event use fifo?
+
         while True:
             try:
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
-                    if event['type'] == 'ADDED':
-                        print('New pod ' + event['object'].metadata.name)
-                        # TODO create Pod object from received event data here
+                    print('Event type ', event['type'])
+                    if event['type'] == 'ADDED' and event['object'].spec.scheduler_name == self.scheduler_name:
+                        new_pod = Pod(event['object'].metadata, event['object'].spec, event['object'].status)
+                        print('New pod ADDED', new_pod.metadata.name)
+
                         self.monitor.update_nodes()
-                        print('Used scheduler: ' + event['object'].spec.scheduler_name)
+                        self.monitor.print_nodes_stats()
+
+                        new_node = self.choose_node(new_pod)
+
+                        if new_node is not None:
+                            self.bind_to_node(new_pod.metadata.name, new_node.metadata.name)
+                        else:
+                            print('Pod cannot be scheduled..')
+                            # TODO what to do with this
+                            # when Pod cannot be scheduled it is being deleted and after
+                            # couple seconds new Pod is created and another attempt
+                            # of scheduling this Pod is being made
+
             except Exception as e:
                 print(str(e))
             sleep(5)
@@ -54,10 +76,13 @@ class Scheduler:
         :return node.Node: return best selected Node for Pod,
             None if Pod cannot be scheduled
         """
-        filtered_nodes = self.filter_nodes(pod)
-        selected_node = self.score_nodes(pod, filtered_nodes)
+        possible_nodes = self.filter_nodes(pod)
 
-        return selected_node
+        print('Possible nodes')
+        for node in possible_nodes.items:
+            print(node.metadata.name)
+
+        return self.score_nodes(pod, possible_nodes)
 
     def filter_nodes(self, pod):
         """
@@ -67,9 +92,21 @@ class Scheduler:
         :return node.NodeList: List of Node which
             satisfy Pod requirements
         """
-        return NodeList()
+        return_node_list = NodeList()
+        if pod.spec.node_name is not None:
+            for node in self.monitor.all_nodes:
+                if pod.spec.node_name == node.metadata.name:
+                    return_node_list.items.append(node)
+        else:
+            print('All nodes can be used for Pod %s ' % pod.metadata.name)
+            for node in self.monitor.all_nodes:
+                # TODO check labels there and decide if Node can be used for pod
+                return_node_list.items.append(node)
 
-    def score_nodes(self, pod, node_list):
+        return return_node_list
+
+    @staticmethod
+    def score_nodes(pod, node_list):
         """
         Score Nodes passed in node_list to choose the best one
         :param pod.Pod pod: Pod to be scheduled
@@ -79,7 +116,19 @@ class Scheduler:
             for Pod passed as pod, None if any node cannot be
             selected
         """
-        return Node()
+        best_node = None
+
+        if len(node_list.items) == 0:
+            pass
+
+        elif len(node_list.items) == 1:
+            best_node = node_list.items[0]
+
+        else:
+            print('Running scoring process ')
+            best_node = node_list.items[0]
+
+        return best_node
 
     def bind_to_node(self, pod_name, node_name, namespace='default'):
         """
@@ -87,24 +136,8 @@ class Scheduler:
         :param str pod_name: pod name which we are binding
         :param str node_name: node name which pod has to be binded
         :param str namespace: namespace of pod
-        :return: True if pod was binded successfully, False otherwise
+        :return: True if pod was bound successfully, False otherwise
         """
-        # 2nd method TODO test it
-        # body = client.V1Binding()
-        #
-        # target = client.V1ObjectReference()
-        # target.kind = "Node"
-        # target.apiVersion = "v1"
-        # target.name = node
-        #
-        # meta = client.V1ObjectMeta()
-        # meta.name = name
-        #
-        # body.target = target
-        # body.metadata = meta
-        #
-        # return v1.create_namespaced_binding_binding(name, namespace, body)
-
         target = client.V1ObjectReference()
         target.kind = "Node"
         target.api_version = "v1"
@@ -115,16 +148,23 @@ class Scheduler:
         body = client.V1Binding(target=target)
         body.target = target
         body.metadata = meta
-
         try:
             self.v1.create_namespaced_binding(namespace, body)
             return True
         except Exception as e:
+            """
+            create_namespaced_binding() throws exception:
+            Invalid value for `target`, must not be `None`
+            or 
+            despite the fact this exception is being thrown,
+            Pod is bound to a Node and Pod is running
+            """
+            print('here')
             print('exception' + str(e))
             return False
 
     @staticmethod
-    def pass_to_scheduler(self, name_, namespace_, scheduler_name_='default-scheduler'):
+    def pass_to_scheduler(name_, namespace_, scheduler_name_='default-scheduler'):
         """
         Pass deployment to be scheduled by different scheduler
         :param str scheduler_name_: name of new scheduler, which will
