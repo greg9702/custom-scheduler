@@ -35,11 +35,6 @@ class Scheduler:
         p1 = Thread(target=self.monitor.monitor_runner)
         p1.start()
 
-        # TODO add queue for pods to be scheduled
-        # 1st thread listen for events and add pods to deploy queue
-        # 2nd take pods from queue and schedule them, use mutex for synchronization
-        # TODO do event use fifo?
-
         while True:
             try:
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
@@ -57,7 +52,6 @@ class Scheduler:
                             self.bind_to_node(new_pod.metadata.name, new_node.metadata.name)
                         else:
                             print('Pod cannot be scheduled..')
-                            # TODO what to do with this
                             # when Pod cannot be scheduled it is being deleted and after
                             # couple seconds new Pod is created and another attempt
                             # of scheduling this Pod is being made
