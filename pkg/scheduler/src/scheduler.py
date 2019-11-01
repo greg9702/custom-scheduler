@@ -94,12 +94,12 @@ class Scheduler:
         """
         return_node_list = NodeList()
         if pod.spec.node_name is not None:
-            for node in self.monitor.all_nodes:
+            for node in self.monitor.all_nodes.items:
                 if pod.spec.node_name == node.metadata.name:
                     return_node_list.items.append(node)
         else:
             print('All nodes can be used for Pod %s ' % pod.metadata.name)
-            for node in self.monitor.all_nodes:
+            for node in self.monitor.all_nodes.items:
                 # TODO check labels there and decide if Node can be used for pod
                 return_node_list.items.append(node)
 

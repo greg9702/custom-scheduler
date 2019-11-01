@@ -30,7 +30,7 @@ class ClusterMonitor:
         self.v1 = client.CoreV1Api()
 
         self.all_pods = PodList()
-        self.all_nodes = []  # TODO change to nodeList
+        self.all_nodes = NodeList()  # TODO change to nodeList
         self.pods_not_to_garbage = []
 
     def print_nodes_stats(self):
@@ -38,7 +38,7 @@ class ClusterMonitor:
         Print node stats
         :return:
         """
-        for node in self.all_nodes:
+        for node in self.all_nodes.items:
             print(node.metadata.name, node.usage)
 
     def update_nodes(self):
@@ -48,12 +48,12 @@ class ClusterMonitor:
         :return:
         """
         self.status_lock.acquire(blocking=True)
-        self.all_nodes = []
+        self.all_nodes = NodeList()
         print('Updating nodes')
         for node_ in self.v1.list_node().items:
             node = Node(node_.metadata, node_.spec, node_.status)
             node.update_node(self.all_pods)
-            self.all_nodes.append(node)
+            self.all_nodes.items.append(node)
 
         self.status_lock.release()
 
