@@ -4,7 +4,7 @@ import time
 import os
 from kubernetes import client, config
 from node import Node, NodeList
-from pod import PodList, Pod
+from pod import Pod, PodList
 from threading import Thread, Lock
 from time import sleep
 
@@ -29,7 +29,7 @@ class ClusterMonitor:
         config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
         self.v1 = client.CoreV1Api()
 
-        self.all_pods = []  # TODO change to podList
+        self.all_pods = PodList()
         self.all_nodes = []  # TODO change to nodeList
         self.pods_not_to_garbage = []
 
@@ -77,14 +77,14 @@ class ClusterMonitor:
         self.status_lock.acquire(blocking=True)
 
         # set all current pods as inactive
-        for pod in self.all_pods:
+        for pod in self.all_pods.items:
             pod.is_alive = False
         for pod_ in self.v1.list_pod_for_all_namespaces().items:
 
             skip = False
 
             if pod_.status.phase == 'Running':
-                for pod in self.all_pods:
+                for pod in self.all_pods.items:
                     if pod_.metadata.name == pod.metadata.name:
                         # found in collection, so update its usage
                         skip = True  # skip creating new Pod
@@ -108,10 +108,9 @@ class ClusterMonitor:
                     pod = Pod(pod_.metadata, pod_.spec, pod_.status)
                     pod.is_alive = True
                     print('Added pod ' + pod.metadata.name)
-                    print('number of pods %s' % len(self.all_pods))
-                    self.all_pods.append(pod)
+                    self.all_pods.items.append(pod)
 
-        print('Number of Pods ', len(self.all_pods))
+        print('Number of Pods ', len(self.all_pods.items))
         self.status_lock.release()
         self.garbage_old_pods()
 
@@ -123,9 +122,9 @@ class ClusterMonitor:
         :return:
         """
         self.status_lock.acquire(blocking=True)
-        for pod in self.all_pods[:]:
+        for pod in self.all_pods.items[:]:
             if not pod.is_alive:
-                self.all_pods.remove(pod)
+                self.all_pods.items.remove(pod)
                 print('Pod %s deleted' % pod.metadata.name)
         self.status_lock.release()
 
