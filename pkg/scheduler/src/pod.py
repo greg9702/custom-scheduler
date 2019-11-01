@@ -30,7 +30,7 @@ class Pod(object):
         self.metadata = metadata_
         self.spec = spec_
         self.status = status_
-        self.usage = list()
+        self.usage = []
         self.is_alive = True
 
     def __eq__(self, other):
@@ -52,8 +52,8 @@ class Pod(object):
             json_data = json.loads(resp)
         except Exception as e:
             if len(self.usage) <= 1:
-                self.usage = list()
-            self.usage.append(dict({'cpu': 0, 'memory': 0}))
+                self.usage = []
+            self.usage.append({'cpu': 0, 'memory': 0})
             return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
@@ -71,7 +71,7 @@ class Pod(object):
         if len(self.usage) > LIMIT_OF_RECORDS:
             self.usage.pop(0)
 
-        self.usage.append(dict({'cpu': tmp_cpu, 'memory': tmp_mem}))
+        self.usage.append({'cpu': tmp_cpu, 'memory': tmp_mem})
 
         return 0
 
@@ -90,6 +90,6 @@ class Pod(object):
                     sum_mem += int(entry['memory'])
                 avg_cpu = sum_cpu / len(self.usage)
                 avg_mem = sum_mem / len(self.usage)
-                return dict({'cpu': avg_cpu, 'memory': avg_mem})
+                return {'cpu': avg_cpu, 'memory': avg_mem}
         else:
-            return dict({'cpu': 0, 'memory': 0})
+            return {'cpu': 0, 'memory': 0}

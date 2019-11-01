@@ -22,7 +22,7 @@ class Node(object):
         if type(status_) is not client.models.V1NodeStatus:
             raise str("Passed invalid type")
 
-        self.usage = dict()
+        self.usage = {}
         self.pods = PodList()
 
         self.metadata = metadata_
@@ -51,7 +51,7 @@ class Node(object):
                 memory += int(pod.get_usage()['memory'])
                 cpu += int(pod.get_usage()['cpu'])
 
-        return dict({'cpu': cpu, 'memory': memory})
+        return {'cpu': cpu, 'memory': memory}
 
     def get_pods_on_node(self, pod_list):
         """

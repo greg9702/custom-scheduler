@@ -31,7 +31,7 @@ class ClusterMonitor:
 
         self.all_pods = []
         self.all_nodes = []
-        self.pods_not_to_garbage = list()
+        self.pods_not_to_garbage = []
 
     def update_nodes(self):
         """
