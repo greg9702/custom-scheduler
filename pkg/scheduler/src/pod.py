@@ -51,10 +51,8 @@ class Pod(object):
             resp = response[0].data.decode('utf-8')
             json_data = json.loads(resp)
         except Exception as e:
-            print('len of usage ', len(self.usage))
             if len(self.usage) <= 1:
                 self.usage = list()
-                print('cleared usage list')
             self.usage.append(dict({'cpu': 0, 'memory': 0}))
             return int(str(e)[1:4])
 
@@ -64,7 +62,6 @@ class Pod(object):
 
         # TODO check units of this...
         for container in json_data['containers']:
-            print('number of containters ', len(json_data['containers']))
             # when Pod is in Error state, it containers usage is returned as 0
             if container['usage']['memory'] != '0':
                 tmp_mem += int(container['usage']['memory'][:-2])
@@ -89,7 +86,6 @@ class Pod(object):
         if len(self.usage) > 0:
             if not MIX_METRICS:
                 for entry in self.usage:
-                    print(self.metadata.name, 'get usage ', self.usage)
                     sum_cpu += int(entry['cpu'])
                     sum_mem += int(entry['memory'])
                 avg_cpu = sum_cpu / len(self.usage)

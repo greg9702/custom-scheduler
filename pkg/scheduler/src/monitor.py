@@ -45,7 +45,6 @@ class ClusterMonitor:
             node = Node(node_.metadata, node_.spec, node_.status)
             node.update_node(self.all_pods)
             self.all_nodes.append(node)
-            print(node.metadata.name, node.usage)
 
         self.status_lock.release()
 
@@ -71,7 +70,6 @@ class ClusterMonitor:
         # set all current pods as inactive
         for pod in self.all_pods:
             pod.is_alive = False
-
         for pod_ in self.v1.list_pod_for_all_namespaces().items:
 
             skip = False
@@ -101,9 +99,10 @@ class ClusterMonitor:
                     pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
                     pod.is_alive = True
                     print('Added pod ' + pod.metadata.name)
-                    print(len(self.all_pods))
+                    print('number of pods %s' % len(self.all_pods))
                     self.all_pods.append(pod)
 
+        print('Number of Pods ', len(self.all_pods))
         self.status_lock.release()
         self.garbage_old_pods()
 
@@ -115,7 +114,6 @@ class ClusterMonitor:
         :return:
         """
         self.status_lock.acquire(blocking=True)
-        print('Length of pods_list %s' % len(self.all_pods))
         for pod in self.all_pods[:]:
             if not pod.is_alive:
                 self.all_pods.remove(pod)
