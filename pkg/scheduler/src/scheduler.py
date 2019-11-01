@@ -4,7 +4,7 @@ from threading import Thread
 
 from monitor import ClusterMonitor
 from node import NodeList
-from pod import Pod
+from pod import Pod, SchedulingPriority
 
 from kubernetes import client, config, watch
 
@@ -53,9 +53,7 @@ class Scheduler:
 
             except Exception as e:
                 print(str(e))
-            sleep(5)
-
-        p1.join()
+            # sleep(5)
 
     def choose_node(self, pod):
         """
@@ -71,7 +69,12 @@ class Scheduler:
         for node in possible_nodes.items:
             print(node.metadata.name)
 
-        return self.score_nodes(pod, possible_nodes)
+        selected_node = self.score_nodes(pod, possible_nodes)
+        if selected_node is not None:
+            print('Selected Node', selected_node.metadata.name)
+        else:
+            print('No node was being selected')
+        return selected_node
 
     def filter_nodes(self, pod):
         """
@@ -81,16 +84,19 @@ class Scheduler:
         :return node.NodeList: List of Node which
             satisfy Pod requirements
         """
+        # TODO get rid off copying elements?
         return_node_list = NodeList()
+
         if pod.spec.node_name is not None:
             for node in self.monitor.all_nodes.items:
-                if pod.spec.node_name == node.metadata.name:
+                if pod.spec.node_name == node.metadata.name and node.spec.unschedulable is not True:
                     return_node_list.items.append(node)
         else:
             print('All nodes can be used for Pod %s ' % pod.metadata.name)
             for node in self.monitor.all_nodes.items:
-                # TODO check labels there and decide if Node can be used for pod
-                return_node_list.items.append(node)
+                if node.spec.unschedulable is not True:
+                    # TODO check labels there and decide if Node can be used for pod
+                    return_node_list.items.append(node)
 
         return return_node_list
 
@@ -115,9 +121,33 @@ class Scheduler:
 
         else:
             print('Running scoring process ')
+
             best_node = node_list.items[0]
 
+            for node in node_list.items:
+                print(node.metadata.name, node.usage)
+
+                if pod.scheduling_priority == SchedulingPriority.MEMORY:
+                    if node.usage['memory'] < best_node.usage['memory']:
+                        best_node = node
+
+                elif pod.scheduling_priority == SchedulingPriority.CPU:
+                    if node.usage['cpu'] < best_node.usage['memory']:
+                        best_node = node
+
+                elif pod.scheduling_priority == SchedulingPriority.CPU:
+                    pass
+                    # current_best =
+
         return best_node
+
+    def calculate_score(self, pod):
+        """
+        Calculate score for a Node using defined formula
+        :param pod.Pod pod:
+        :return int: Node score
+        """
+
 
     def bind_to_node(self, pod_name, node_name, namespace='default'):
         """
