@@ -1,14 +1,9 @@
-#!/usr/bin/python
-
-import time
-import json
 import os
-
 from time import sleep
-from threading import Thread, Lock
+from threading import Thread
 
 from monitor import ClusterMonitor
-from node import Node, NodeList
+from node import NodeList
 from pod import Pod
 
 from kubernetes import client, config, watch

@@ -1,12 +1,12 @@
-#!/usr/bin/python
-
 import time
 import os
+from time import sleep
+from threading import Thread, Lock
+
 from kubernetes import client, config
+
 from node import Node, NodeList
 from pod import Pod, PodList
-from threading import Thread, Lock
-from time import sleep
 
 # refresh interval in seconds
 TIME_INTERVAL = 3
