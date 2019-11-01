@@ -1,10 +1,17 @@
 import json
+from enum import Enum
 
 from kubernetes import client
 
 LIMIT_OF_RECORDS = 1000
 
 MIX_METRICS = False
+
+
+class SchedulingPriority(Enum):
+    NONE = 0
+    MEMORY = 1
+    CPU = 2
 
 
 class PodList(object):
@@ -33,6 +40,9 @@ class Pod(object):
         self.usage = []
         self.is_alive = True
 
+        # label set priority for this pod
+        self.scheduling_priority = SchedulingPriority.NONE
+
     def __eq__(self, other):
         return self.metadata.name == other.metadata.name
 
@@ -60,7 +70,7 @@ class Pod(object):
         tmp_mem = 0
         tmp_cpu = 0
 
-        # TODO check units of this...
+        # TODO mix metrics here.. but it would be a lot of work
         for container in json_data['containers']:
             # when Pod is in Error state, it containers usage is returned as 0
             if container['usage']['memory'] != '0':
@@ -78,18 +88,16 @@ class Pod(object):
     def get_usage(self):
         """
         Get usage calculated based on Pod statistics
-        TODO round this value
         :return dict: dict('cpu': cpu_usage, 'memory': memory_usage)
         """
         sum_cpu = 0
         sum_mem = 0
         if len(self.usage) > 0:
-            if not MIX_METRICS:
-                for entry in self.usage:
-                    sum_cpu += int(entry['cpu'])
-                    sum_mem += int(entry['memory'])
-                avg_cpu = sum_cpu / len(self.usage)
-                avg_mem = sum_mem / len(self.usage)
-                return {'cpu': avg_cpu, 'memory': avg_mem}
+            for entry in self.usage:
+                sum_cpu += int(entry['cpu'])
+                sum_mem += int(entry['memory'])
+            avg_cpu = sum_cpu / len(self.usage)
+            avg_mem = sum_mem / len(self.usage)
+            return {'cpu': avg_cpu, 'memory': avg_mem}
         else:
             return {'cpu': 0, 'memory': 0}
