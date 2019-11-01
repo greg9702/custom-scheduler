@@ -32,6 +32,7 @@ class Node(object):
     def update_node(self, pod_list):
         """
         Update Node Pods and usage attributes
+        :param
         :return:
         """
         self.pods = self.get_pods_on_node(pod_list)
@@ -55,7 +56,7 @@ class Node(object):
 
     def get_pods_on_node(self, pod_list):
         """
-        Browse all avaliable Pods in cluster and
+        Browse all available Pods in cluster and
         assign them to Node
         :return PodList:
         """

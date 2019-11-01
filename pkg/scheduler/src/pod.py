@@ -1,6 +1,6 @@
-from kubernetes import client
-
 import json
+
+from kubernetes import client
 
 LIMIT_OF_RECORDS = 1000
 

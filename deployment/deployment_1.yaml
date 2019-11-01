@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: hello-kubernetes-2
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       app: hello-kubernetes
@@ -12,6 +12,8 @@ spec:
       labels:
         app: hello-kubernetes
     spec:
+      nodeName: kind-control
+      schedulerName: my_scheduler
       containers:
       - name: hello-kubernetes
         image: paulbouwer/hello-kubernetes:1.5
