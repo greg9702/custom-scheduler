@@ -4,7 +4,7 @@ from pod import PodList
 
 class NodeList(object):
     def __init__(self):
-        self.items = list()
+        self.items = []
 
 
 class Node(object):
