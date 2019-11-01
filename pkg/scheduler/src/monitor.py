@@ -29,9 +29,17 @@ class ClusterMonitor:
         config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
         self.v1 = client.CoreV1Api()
 
-        self.all_pods = []
-        self.all_nodes = []
+        self.all_pods = []  # TODO change to podList
+        self.all_nodes = []  # TODO change to nodeList
         self.pods_not_to_garbage = []
+
+    def print_nodes_stats(self):
+        """
+        Print node stats
+        :return:
+        """
+        for node in self.all_nodes:
+            print(node.metadata.name, node.usage)
 
     def update_nodes(self):
         """
@@ -40,6 +48,7 @@ class ClusterMonitor:
         :return:
         """
         self.status_lock.acquire(blocking=True)
+        self.all_nodes = []
         print('Updating nodes')
         for node_ in self.v1.list_node().items:
             node = Node(node_.metadata, node_.spec, node_.status)
@@ -90,13 +99,13 @@ class ClusterMonitor:
                                 print('Unknown metrics server error %s' % res)
                             break
 
-                        print('Updated metrics for pod %s' % pod.metadata.name)
+                        #                        print('Updated metrics for pod %s' % pod.metadata.name)
 
                         break
 
                 if not skip:
                     # this is new pod, add it to
-                    pod = Pod(pod_.metadata,  pod_.spec, pod_.status)
+                    pod = Pod(pod_.metadata, pod_.spec, pod_.status)
                     pod.is_alive = True
                     print('Added pod ' + pod.metadata.name)
                     print('number of pods %s' % len(self.all_pods))
