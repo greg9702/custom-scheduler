@@ -5,11 +5,9 @@ from threading import Thread, Lock
 
 from kubernetes import client, config
 
+import settings
 from node import Node, NodeList
 from pod import Pod, PodList
-
-# refresh interval in seconds
-TIME_INTERVAL = 3
 
 
 class ClusterMonitor:
@@ -24,7 +22,7 @@ class ClusterMonitor:
         self.status_lock = Lock()
 
         # time interval is seconds to update Pods statistics
-        self.time_interval = TIME_INTERVAL
+        self.time_interval = settings.TIME_INTERVAL
 
         config.load_kube_config(config_file=os.path.join(os.path.dirname(__file__), '../kind-config'))
         self.v1 = client.CoreV1Api()
