@@ -2,11 +2,7 @@ import json
 from enum import Enum
 
 from kubernetes import client
-
-LIMIT_OF_RECORDS = 1000
-
-MIX_METRICS = False
-
+import settings
 
 class SchedulingPriority(Enum):
     NONE = 0
@@ -71,14 +67,38 @@ class Pod(object):
         tmp_cpu = 0
 
         # TODO mix metrics here.. but it would be a lot of work
-        for container in json_data['containers']:
-            # when Pod is in Error state, it containers usage is returned as 0
-            if container['usage']['memory'] != '0':
-                tmp_mem += int(container['usage']['memory'][:-2])
-            if container['usage']['cpu'] != '0':
-                tmp_cpu += int(container['usage']['cpu'][:-1])
 
-        if len(self.usage) > LIMIT_OF_RECORDS:
+        for container in json_data['containers']:
+            if not settings.MIX_METRICS:
+                # when Pod is in Error state, it containers usage is returned as 0
+                # TODO do i need this ifs...???
+                if container['usage']['memory'] != '0':
+                    tmp_mem += int(container['usage']['memory'][:-2])
+                if container['usage']['cpu'] != '0':
+                    tmp_cpu += int(container['usage']['cpu'][:-1])
+            else:
+                # if container have specified req field use it instead of usage
+                found = False
+                tmp_cont = None
+
+                for cont in self.spec.containers:
+                    if cont.name == container['name'] and cont.resources.requests is not None:
+                        tmp_cont = cont
+                        found = True
+                        break
+
+                if found:
+                    print(container['name'], 'using set requests', tmp_cont.resources.requests)
+                else:
+                    print(container['name'], 'USAGE')
+                    print(container['usage']['memory'])
+                    print(container['usage']['cpu'])
+                    if container['usage']['memory'] != '0':
+                        tmp_mem += int(container['usage']['memory'][:-2])
+                    if container['usage']['cpu'] != '0':
+                        tmp_cpu += int(container['usage']['cpu'][:-1])
+
+        if len(self.usage) > settings.LIMIT_OF_RECORDS:
             self.usage.pop(0)
 
         self.usage.append({'cpu': tmp_cpu, 'memory': tmp_mem})
