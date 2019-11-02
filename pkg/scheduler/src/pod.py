@@ -4,6 +4,7 @@ from enum import Enum
 from kubernetes import client
 import settings
 
+
 class SchedulingPriority(Enum):
     NONE = 0
     MEMORY = 1
@@ -71,7 +72,6 @@ class Pod(object):
         for container in json_data['containers']:
             if not settings.MIX_METRICS:
                 # when Pod is in Error state, it containers usage is returned as 0
-                # TODO do i need this ifs...???
                 if container['usage']['memory'] != '0':
                     tmp_mem += int(container['usage']['memory'][:-2])
                 if container['usage']['cpu'] != '0':
@@ -88,11 +88,26 @@ class Pod(object):
                         break
 
                 if found:
-                    print(container['name'], 'using set requests', tmp_cont.resources.requests)
+                    print('[REQUESTS]', container['name'], tmp_cont.resources.requests)
+
+                    # there can be only one param specified in requests
+                    # TODO check if value is not 0 in requests
+
+                    if 'cpu' in tmp_cont.resources.requests:
+                        tmp_cpu += int(tmp_cont.resources.requests['cpu'][:-1])
+                    else:
+                        if container['usage']['cpu'] != '0':
+                            tmp_cpu += int(container['usage']['cpu'][:-1])
+
+                    if 'memory' in tmp_cont.resources.requests:
+                        tmp_mem += int(tmp_cont.resources.requests['memory'][:-2])
+                    else:
+                        if container['usage']['memory'] != '0':
+                            tmp_mem += int(container['usage']['memory'][:-2])
+
                 else:
-                    print(container['name'], 'USAGE')
-                    print(container['usage']['memory'])
-                    print(container['usage']['cpu'])
+                    print('[USAGE]', container['name'], '{ \'cpu:\'', container['usage']['cpu'],
+                          ', \'memory\'', container['usage']['memory'], '}')
                     if container['usage']['memory'] != '0':
                         tmp_mem += int(container['usage']['memory'][:-2])
                     if container['usage']['cpu'] != '0':
@@ -101,6 +116,7 @@ class Pod(object):
         if len(self.usage) > settings.LIMIT_OF_RECORDS:
             self.usage.pop(0)
 
+        print({'cpu': tmp_cpu, 'memory': tmp_mem})
         self.usage.append({'cpu': tmp_cpu, 'memory': tmp_mem})
 
         return 0
