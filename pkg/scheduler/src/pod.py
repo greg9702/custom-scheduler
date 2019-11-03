@@ -11,6 +11,24 @@ class SchedulingPriority(Enum):
     CPU = 2
 
 
+class DataType(Enum):
+    MEMORY = 0
+    CPU = 1
+
+
+memory_type_wage = \
+    {
+        'Ki': 1, 'K': 1,
+        'Mi': 1000, 'M': 1000,
+        'Gi': 1000000, 'G': 1000000,
+        'Ti': 1000000000, 'T': 1000000000,
+        'Pi': 1000000000000, 'P': 1000000000000,
+        'Ei': 1000000000000000, 'E': 1000000000000000,
+    }
+
+BASE_MEMORY_WAGE = memory_type_wage['Ki']
+
+
 class PodList(object):
     def __init__(self):
         self.items = []
@@ -120,6 +138,61 @@ class Pod(object):
         self.usage.append({'cpu': tmp_cpu, 'memory': tmp_mem})
 
         return 0
+
+    @staticmethod
+    def parse_usage_data(data_string, data_type):
+        """
+        Parse input stream to unified value for CPU and memory usage
+        memory data string eg. 128974848, 129e6, 129M, 123Mi
+        correct types Ei, Pi, Ti, Gi, Mi, Ki
+        :param str data_string: string containing data to translate
+        :param  DataType data_type: type of input data
+        :return int/None: return in value in Ki for memory and ??? for
+            CPU, None if passed data was incorrect
+        """
+        if type(data_type) is not DataType:
+            print('Passed invalid type')
+            return None
+
+        if len(data_string) == 0:
+            print('Passed empty data string')
+            return None
+
+        if data_type == DataType.MEMORY:
+
+            if data_string[-1].isalpha():
+
+                if data_string[-2:].isalpha():
+                    wage = memory_type_wage[data_string[-2:]] / BASE_MEMORY_WAGE
+                    value = int(data_string[:-2])
+
+                elif data_string[-1:].isalpha():
+                    wage = memory_type_wage[data_string[-1:]] / BASE_MEMORY_WAGE
+                    value = int(data_string[:-1])
+                else:
+                    return None
+
+                return int(wage * value)
+
+            else:
+                if 'e' in data_string:
+                    print('E notation not implemented yet')
+                    return None
+                    # TODO implement this
+
+                return int(data_string)
+
+        elif data_type == DataType.CPU:
+
+            if data_string[-1].isalpha(): # TODO check this letter
+
+                for char in data_string[:-1]:
+                    if char.isalpha():
+                        return None
+
+                return int(data_string[:-1])
+            else:
+                return None
 
     def get_usage(self):
         """
