@@ -47,12 +47,17 @@ class Scheduler:
                         else:
                             print('Pod cannot be scheduled..')
                             # when Pod cannot be scheduled it is being deleted and after
-                            # couple seconds new Pod is created and another attempt
+                            # couple seconds new Pod is being created and another attempt
                             # of scheduling this Pod is being made
+
+                # TODO wait for metrics for newly created Pod
+                """
+                without this cluster for 2nd and next Pods in deployment looks the same, 
+                so all Pods from deployment are placed on the same Node, we want to avoid this
+                """
 
             except Exception as e:
                 print(str(e))
-            # sleep(5)
 
     def choose_node(self, pod):
         """
@@ -146,7 +151,6 @@ class Scheduler:
         :param pod.Pod pod:
         :return int: Node score
         """
-
 
     def bind_to_node(self, pod_name, node_name, namespace='default'):
         """
