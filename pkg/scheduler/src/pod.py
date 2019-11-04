@@ -85,8 +85,6 @@ class Pod(object):
         tmp_mem = 0
         tmp_cpu = 0
 
-        # TODO mix metrics here.. but it would be a lot of work
-
         for container in json_data['containers']:
             if not settings.MIX_METRICS:
                 # when Pod is in Error state, it containers usage is returned as 0
@@ -94,7 +92,8 @@ class Pod(object):
                     tmp_mem += int(container['usage']['memory'][:-2])
                 if container['usage']['cpu'] != '0':
                     tmp_cpu += int(container['usage']['cpu'][:-1])
-            else:
+
+            elif settings.MIX_METRICS:
                 # if container have specified req field use it instead of usage
                 found = False
                 tmp_cont = None
@@ -109,27 +108,27 @@ class Pod(object):
                     print('[REQUESTS]', container['name'], tmp_cont.resources.requests)
 
                     # there can be only one param specified in requests
-                    # TODO check if value is not 0 in requests
+                    # TODO cpu units m and n
 
                     if 'cpu' in tmp_cont.resources.requests:
-                        tmp_cpu += int(tmp_cont.resources.requests['cpu'][:-1])
+                        tmp_cpu += self.parse_usage_data(tmp_cont.resources.requests['cpu'], DataType.CPU)
                     else:
                         if container['usage']['cpu'] != '0':
-                            tmp_cpu += int(container['usage']['cpu'][:-1])
+                            tmp_cpu += self.parse_usage_data(container['usage']['cpu'], DataType.CPU)
 
                     if 'memory' in tmp_cont.resources.requests:
-                        tmp_mem += int(tmp_cont.resources.requests['memory'][:-2])
+                        tmp_mem += self.parse_usage_data(tmp_cont.resources.requests['memory'], DataType.MEMORY)
                     else:
                         if container['usage']['memory'] != '0':
-                            tmp_mem += int(container['usage']['memory'][:-2])
+                            tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
 
                 else:
                     print('[USAGE]', container['name'], '{ \'cpu:\'', container['usage']['cpu'],
                           ', \'memory\'', container['usage']['memory'], '}')
                     if container['usage']['memory'] != '0':
-                        tmp_mem += int(container['usage']['memory'][:-2])
+                        tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
                     if container['usage']['cpu'] != '0':
-                        tmp_cpu += int(container['usage']['cpu'][:-1])
+                        tmp_cpu += self.parse_usage_data(container['usage']['cpu'], DataType.CPU)
 
         if len(self.usage) > settings.LIMIT_OF_RECORDS:
             self.usage.pop(0)
@@ -177,7 +176,7 @@ class Pod(object):
             else:
                 if 'e' in data_string:
                     print('E notation not implemented yet')
-                    return None
+                    raise Exception('Not implemented')
                     # TODO implement this
 
                 return int(data_string)
