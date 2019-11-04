@@ -9,6 +9,8 @@ import settings
 from node import Node, NodeList
 from pod import Pod, PodList
 
+NUMBER_OF_RETRIES = 7
+
 
 class ClusterMonitor:
     """
@@ -66,6 +68,47 @@ class ClusterMonitor:
             self.update_pods()
             time.sleep(self.time_interval)
 
+    def wait_for_pod(self, new_pod):
+        """
+        Wait for Pod to be ready - got metrics from
+        metrics server
+        :param pod.Pod new_pod: Pod to wait for
+        :return:
+        """
+        retries = 0
+
+        while True:
+            found = False
+
+            self.status_lock.acquire(blocking=True)
+
+            for pod in self.all_pods.items:
+                if new_pod.metadata.name == pod.metadata.name:
+                    found = True
+                    break
+
+            self.status_lock.release()
+
+            if found:
+                print('Waiting for pod %s' % new_pod.metadata.name)
+                val = new_pod.fetch_usage()
+
+                if val == 0:
+                    print('Pod %s ready...' % new_pod.metadata.name)
+                    break
+                else:
+                    print('Pod %s not ready...' % new_pod.metadata.name)
+
+            else:
+                print('Pod %s not found' % new_pod.metadata.name)
+
+                retries += 1
+
+                if retries == NUMBER_OF_RETRIES:
+                    break
+
+            sleep(1)
+
     def update_pods(self):
         """
         Update all Pods in cluster, if Pod exists add usage statistics
@@ -89,7 +132,7 @@ class ClusterMonitor:
 
                         res = pod.fetch_usage()
                         pod.is_alive = True
-                        # TODO what to do when metrics reciving failed
+                        # TODO what to do when metrics receiving failed
                         if res != 0:
                             if res == 404:
                                 print('Metrics for pod %s not found ' % pod.metadata.name)
