@@ -73,12 +73,16 @@ class Pod(object):
         try:
             api_client = client.ApiClient()
             response = api_client.call_api(metrics_url, 'GET', _preload_content=None)
+
             resp = response[0].data.decode('utf-8')
             json_data = json.loads(resp)
+
         except Exception as e:
             if len(self.usage) <= 1:
                 self.usage = []
+
             self.usage.append({'cpu': 0, 'memory': 0})
+
             return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
