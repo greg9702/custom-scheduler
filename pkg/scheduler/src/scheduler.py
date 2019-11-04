@@ -44,17 +44,20 @@ class Scheduler:
 
                         if new_node is not None:
                             self.bind_to_node(new_pod.metadata.name, new_node.metadata.name)
+
+                            """
+                            without this cluster for 2nd and next Pods in deployment looks the same, 
+                            so all Pods from deployment are placed on the same Node, we want to avoid this
+                            block scheduling thread until newly created Pod is ready
+                            """
+                            self.monitor.wait_for_pod(new_pod)
                         else:
                             print('Pod cannot be scheduled..')
-                            # when Pod cannot be scheduled it is being deleted and after
-                            # couple seconds new Pod is being created and another attempt
-                            # of scheduling this Pod is being made
-
-                # TODO wait for metrics for newly created Pod
-                """
-                without this cluster for 2nd and next Pods in deployment looks the same, 
-                so all Pods from deployment are placed on the same Node, we want to avoid this
-                """
+                            """
+                            when Pod cannot be scheduled it is being deleted and after
+                            couple seconds new Pod is being created and another attempt
+                            of scheduling this Pod is being made
+                            """
 
             except Exception as e:
                 print(str(e))
@@ -89,6 +92,7 @@ class Scheduler:
             satisfy Pod requirements
         """
         # TODO get rid off copying elements?
+        # TODO node capacity???
         return_node_list = NodeList()
 
         if pod.spec.node_name is not None:
