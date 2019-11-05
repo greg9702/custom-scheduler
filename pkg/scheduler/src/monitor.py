@@ -1,7 +1,9 @@
 import time
 import os
 from time import sleep
+from datetime import datetime
 from threading import Thread, Lock
+from enum import Enum
 
 from kubernetes import client, config
 
@@ -10,6 +12,11 @@ from node import Node, NodeList
 from pod import Pod, PodList
 
 NUMBER_OF_RETRIES = 7
+
+
+class LoggerType(Enum):
+    EVENT = 0
+    PERIODICAL = 1
 
 
 class ClusterMonitor:
@@ -41,7 +48,7 @@ class ClusterMonitor:
         for node in self.all_nodes.items:
             print(node.metadata.name, node.usage)
 
-    def update_nodes(self):
+    def update_nodes(self, update_type):
         """
         Makes request to API about Nodes in cluster,
         then starts to add rest of attributes
@@ -56,6 +63,7 @@ class ClusterMonitor:
             self.all_nodes.items.append(node)
 
         self.status_lock.release()
+        # self.dump_nodes_stats(update_type)
 
     def monitor_runner(self):
         """
@@ -93,8 +101,12 @@ class ClusterMonitor:
                 print('Waiting for pod %s' % new_pod.metadata.name)
                 val = new_pod.fetch_usage()
 
+                # do not add anything
+                new_pod.usage = []
+
                 if val == 0:
                     print('Pod %s ready...' % new_pod.metadata.name)
+                    print(new_pod.usage)
                     break
                 else:
                     print('Pod %s not ready...' % new_pod.metadata.name)
@@ -120,6 +132,7 @@ class ClusterMonitor:
         # set all current pods as inactive
         for pod in self.all_pods.items:
             pod.is_alive = False
+
         for pod_ in self.v1.list_pod_for_all_namespaces().items:
 
             skip = False
@@ -129,10 +142,10 @@ class ClusterMonitor:
                     if pod_.metadata.name == pod.metadata.name:
                         # found in collection, so update its usage
                         skip = True  # skip creating new Pod
+                        pod.is_alive = True
 
                         res = pod.fetch_usage()
-                        pod.is_alive = True
-                        # TODO what to do when metrics receiving failed
+
                         if res != 0:
                             if res == 404:
                                 print('Metrics for pod %s not found ' % pod.metadata.name)
@@ -185,8 +198,27 @@ class ClusterMonitor:
         """
         while True:
             # event happened
-            self.update_nodes()
+            self.update_nodes(LoggerType.PERIODICAL)
             sleep(5)
+
+    def dump_nodes_stats(self, update_type):
+
+        now = datetime.now()
+        with open('/tmp/node_stats.log', 'a') as file:
+
+            if update_type == LoggerType.EVENT:
+                file.write('[EVENT]')
+            elif update_type == LoggerType.PERIODICAL:
+                file.write('[PERIODICAL]')
+
+            file.write(now.strftime('%m/%d/%Y, %H:%M:%S'))
+            file.write('\n')
+
+            for node in self.all_nodes.items:
+                file.write(node.metadata.name)
+                file.write('\n')
+                file.write(str(node.usage['cpu']) + str(node.usage['cpu']))
+                file.write('\n')
 
 
 if __name__ == '__main__':

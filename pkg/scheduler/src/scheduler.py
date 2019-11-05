@@ -1,7 +1,8 @@
 import os
+from time import sleep
 from threading import Thread
 
-from monitor import ClusterMonitor
+from monitor import ClusterMonitor, LoggerType
 from node import NodeList
 from pod import Pod, SchedulingPriority
 
@@ -29,6 +30,9 @@ class Scheduler:
         p1 = Thread(target=self.monitor.monitor_runner)
         p1.start()
 
+        # p2 = Thread(target=self.periodical_logger)
+        # p2.start()
+
         while True:
             try:
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
@@ -37,7 +41,7 @@ class Scheduler:
                         new_pod = Pod(event['object'].metadata, event['object'].spec, event['object'].status)
                         print('New pod ADDED', new_pod.metadata.name)
 
-                        self.monitor.update_nodes()
+                        self.monitor.update_nodes(LoggerType.EVENT)
                         self.monitor.print_nodes_stats()
 
                         new_node = self.choose_node(new_pod)
@@ -51,6 +55,7 @@ class Scheduler:
                             block scheduling thread until newly created Pod is ready
                             """
                             self.monitor.wait_for_pod(new_pod)
+                            self.monitor.update_pods()
                         else:
                             print('Pod cannot be scheduled..')
                             """
@@ -77,10 +82,12 @@ class Scheduler:
             print(node.metadata.name)
 
         selected_node = self.score_nodes(pod, possible_nodes)
+
         if selected_node is not None:
             print('Selected Node', selected_node.metadata.name)
         else:
             print('No node was being selected')
+
         return selected_node
 
     def filter_nodes(self, pod):
@@ -92,7 +99,6 @@ class Scheduler:
             satisfy Pod requirements
         """
         # TODO get rid off copying elements?
-        # TODO node capacity???
         return_node_list = NodeList()
 
         if pod.spec.node_name is not None:
@@ -147,6 +153,11 @@ class Scheduler:
                     pass
                     # current_best =
 
+        for node in node_list.items:
+            print(node.metadata.name, node.usage)
+
+        print('Selected node:')
+        print(best_node.metadata.name, best_node.usage)
         return best_node
 
     def calculate_score(self, pod):
@@ -204,13 +215,24 @@ class Scheduler:
         body = {"spec": {"template": {"spec": {"schedulerName": scheduler_name_}}}}
 
         api_client = client.ApiClient()
-        response = []
         try:
             response = api_client.call_api(url, 'PATCH', header_params=headers, body=body)
         except Exception as e:
             return int(str(e)[1:4])
 
         return response[1]
+
+    def periodical_logger(self):
+        """
+        Log nodes stats every time period
+        :return:
+        """
+        # time interval in seconds
+        time_interval = 60
+
+        while True:
+            self.monitor.update_nodes(LoggerType.PERIODICAL)
+            sleep(time_interval)
 
 
 def main():
