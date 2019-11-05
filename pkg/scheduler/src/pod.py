@@ -56,7 +56,7 @@ class Pod(object):
         self.is_alive = True
 
         # label set priority for this pod
-        self.scheduling_priority = SchedulingPriority.NONE
+        self.scheduling_priority = SchedulingPriority.MEMORY
 
     def __eq__(self, other):
         return self.metadata.name == other.metadata.name
@@ -81,8 +81,7 @@ class Pod(object):
             if len(self.usage) <= 1:
                 self.usage = []
 
-            self.usage.append({'cpu': 0, 'memory': 0})
-
+            # self.usage.append({'cpu': 0, 'memory': 0})
             return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
@@ -93,9 +92,9 @@ class Pod(object):
             if not settings.MIX_METRICS:
                 # when Pod is in Error state, it containers usage is returned as 0
                 if container['usage']['memory'] != '0':
-                    tmp_mem += int(container['usage']['memory'][:-2])
+                    tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
                 if container['usage']['cpu'] != '0':
-                    tmp_cpu += int(container['usage']['cpu'][:-1])
+                    tmp_cpu += self.parse_usage_data(container['usage']['cpu'], DataType.CPU)
 
             elif settings.MIX_METRICS:
                 # if container have specified req field use it instead of usage
@@ -109,7 +108,7 @@ class Pod(object):
                         break
 
                 if found:
-                    print('[REQUESTS]', container['name'], tmp_cont.resources.requests)
+                    #print('[REQUESTS]', container['name'], tmp_cont.resources.requests)
 
                     # there can be only one param specified in requests
                     # TODO cpu units m and n
@@ -127,8 +126,8 @@ class Pod(object):
                             tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
 
                 else:
-                    print('[USAGE]', container['name'], '{ \'cpu:\'', container['usage']['cpu'],
-                          ', \'memory\'', container['usage']['memory'], '}')
+                    #print('[USAGE]', container['name'], '{ \'cpu:\'', container['usage']['cpu'],
+                    #     ', \'memory\'', container['usage']['memory'], '}')
                     if container['usage']['memory'] != '0':
                         tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
                     if container['usage']['cpu'] != '0':
@@ -137,7 +136,7 @@ class Pod(object):
         if len(self.usage) > settings.LIMIT_OF_RECORDS:
             self.usage.pop(0)
 
-        print({'cpu': tmp_cpu, 'memory': tmp_mem})
+        #print({'cpu': tmp_cpu, 'memory': tmp_mem})
         self.usage.append({'cpu': tmp_cpu, 'memory': tmp_mem})
 
         return 0
