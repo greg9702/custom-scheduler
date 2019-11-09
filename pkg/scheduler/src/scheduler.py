@@ -1,12 +1,18 @@
 import os
 from time import sleep
+from datetime import datetime
 from threading import Thread
+import logging
 
+import settings
 from monitor import ClusterMonitor
 from node import NodeList
 from pod import Pod, SchedulingPriority
 
 from kubernetes import client, config, watch
+
+logging.basicConfig(filename=settings.LOG_FILE, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S',
+                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 class Scheduler:
@@ -30,6 +36,8 @@ class Scheduler:
         p1 = Thread(target=self.monitor.monitor_runner)
         p1.start()
 
+        self.init_log_file()
+
         while True:
             try:
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
@@ -39,6 +47,10 @@ class Scheduler:
                         print('New pod ADDED', new_pod.metadata.name)
 
                         self.monitor.update_nodes()
+
+                        for node in self.monitor.all_nodes.items:
+                            logging.info(node.metadata.name + ' ' + str(node.usage['memory']))
+
                         self.monitor.print_nodes_stats()
 
                         new_node = self.choose_node(new_pod)
@@ -47,7 +59,7 @@ class Scheduler:
                             self.bind_to_node(new_pod.metadata.name, new_node.metadata.name)
 
                             """
-                            without this cluster for 2nd and next Pods in deployment looks the same, 
+                            without this cluster for 2nd and next Pods in deployment looks the same,
                             so all Pods from deployment are placed on the same Node, we want to avoid this
                             block scheduling thread until newly created Pod is ready
                             """
@@ -63,6 +75,24 @@ class Scheduler:
 
             except Exception as e:
                 print(str(e))
+
+    def init_log_file(self):
+        """
+        Initialize log file, insert node names at
+        the first line of a file
+        :return:
+        """
+
+        self.monitor.update_nodes()
+
+        nodes_names = ''
+
+        for node in self.monitor.all_nodes.items:
+            nodes_names += str(node.metadata.name)
+            nodes_names += ':'
+
+        nodes_names = nodes_names[:-1]
+        logging.info(nodes_names)
 
     def choose_node(self, pod):
         """
@@ -84,7 +114,6 @@ class Scheduler:
             print('Selected Node', selected_node.metadata.name)
         else:
             print('No node was being selected')
-
         return selected_node
 
     def filter_nodes(self, pod):
@@ -189,7 +218,7 @@ class Scheduler:
             """
             create_namespaced_binding() throws exception:
             Invalid value for `target`, must not be `None`
-            or 
+            or
             despite the fact this exception is being thrown,
             Pod is bound to a Node and Pod is running
             """
