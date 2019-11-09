@@ -78,7 +78,7 @@ class Pod(object):
         except Exception as e:
             if len(self.usage) <= 1:
                 self.usage = []
-            self.usage.append({'cpu': 0, 'memory': 0})
+            # self.usage.append({'cpu': 0, 'memory': 0})
             return int(str(e)[1:4])
 
         # Pod usage is sum of usage of all containers running inside it
