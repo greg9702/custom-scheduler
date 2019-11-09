@@ -3,7 +3,6 @@ import os
 from time import sleep
 from datetime import datetime
 from threading import Thread, Lock
-from enum import Enum
 
 from kubernetes import client, config
 
@@ -12,11 +11,6 @@ from node import Node, NodeList
 from pod import Pod, PodList
 
 NUMBER_OF_RETRIES = 7
-
-
-class LoggerType(Enum):
-    EVENT = 0
-    PERIODICAL = 1
 
 
 class ClusterMonitor:
@@ -48,7 +42,7 @@ class ClusterMonitor:
         for node in self.all_nodes.items:
             print(node.metadata.name, node.usage)
 
-    def update_nodes(self, update_type):
+    def update_nodes(self):
         """
         Makes request to API about Nodes in cluster,
         then starts to add rest of attributes
@@ -63,7 +57,6 @@ class ClusterMonitor:
             self.all_nodes.items.append(node)
 
         self.status_lock.release()
-        # self.dump_nodes_stats(update_type)
 
     def monitor_runner(self):
         """
@@ -189,37 +182,6 @@ class ClusterMonitor:
         """
         pass
 
-    def read_async(self):
-        """
-        Mock function for tests only,
-        self.update_nodes() will be called when
-        event happened in scheduler.event_monitor
-        :return:
-        """
-        while True:
-            # event happened
-            self.update_nodes(LoggerType.PERIODICAL)
-            sleep(5)
-
-    def dump_nodes_stats(self, update_type):
-
-        now = datetime.now()
-        with open('/tmp/node_stats.log', 'a') as file:
-
-            if update_type == LoggerType.EVENT:
-                file.write('[EVENT]')
-            elif update_type == LoggerType.PERIODICAL:
-                file.write('[PERIODICAL]')
-
-            file.write(now.strftime('%m/%d/%Y, %H:%M:%S'))
-            file.write('\n')
-
-            for node in self.all_nodes.items:
-                file.write(node.metadata.name)
-                file.write('\n')
-                file.write(str(node.usage['cpu']) + str(node.usage['cpu']))
-                file.write('\n')
-
 
 if __name__ == '__main__':
     print('Running')
@@ -228,8 +190,6 @@ if __name__ == '__main__':
     p1 = Thread(target=monitor.monitor_runner)
     p2 = Thread(target=monitor.read_async)
 
-    p2.start()
     p1.start()
 
     p1.join()
-    p2.join()

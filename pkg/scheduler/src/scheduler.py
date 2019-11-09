@@ -2,7 +2,7 @@ import os
 from time import sleep
 from threading import Thread
 
-from monitor import ClusterMonitor, LoggerType
+from monitor import ClusterMonitor
 from node import NodeList
 from pod import Pod, SchedulingPriority
 
@@ -30,9 +30,6 @@ class Scheduler:
         p1 = Thread(target=self.monitor.monitor_runner)
         p1.start()
 
-        # p2 = Thread(target=self.periodical_logger)
-        # p2.start()
-
         while True:
             try:
                 for event in self.watcher.stream(self.v1.list_pod_for_all_namespaces):
@@ -41,7 +38,7 @@ class Scheduler:
                         new_pod = Pod(event['object'].metadata, event['object'].spec, event['object'].status)
                         print('New pod ADDED', new_pod.metadata.name)
 
-                        self.monitor.update_nodes(LoggerType.EVENT)
+                        self.monitor.update_nodes()
                         self.monitor.print_nodes_stats()
 
                         new_node = self.choose_node(new_pod)
@@ -221,18 +218,6 @@ class Scheduler:
             return int(str(e)[1:4])
 
         return response[1]
-
-    def periodical_logger(self):
-        """
-        Log nodes stats every time period
-        :return:
-        """
-        # time interval in seconds
-        time_interval = 60
-
-        while True:
-            self.monitor.update_nodes(LoggerType.PERIODICAL)
-            sleep(time_interval)
 
 
 def main():
