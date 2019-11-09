@@ -7,3 +7,4 @@ venv
 .vscode
 .idea
 .idea/*
+scripts/docker_usage/output

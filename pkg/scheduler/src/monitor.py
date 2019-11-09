@@ -1,5 +1,6 @@
 import time
 import os
+import logging
 from time import sleep
 from datetime import datetime
 from threading import Thread, Lock
