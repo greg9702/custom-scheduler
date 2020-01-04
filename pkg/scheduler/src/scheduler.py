@@ -82,7 +82,6 @@ class Scheduler:
         the first line of a file
         :return:
         """
-
         self.monitor.update_nodes()
 
         nodes_names = ''
@@ -124,7 +123,6 @@ class Scheduler:
         :return node.NodeList: List of Node which
             satisfy Pod requirements
         """
-        # TODO get rid off copying elements?
         return_node_list = NodeList()
 
         if pod.spec.node_name is not None:
@@ -222,7 +220,6 @@ class Scheduler:
             despite the fact this exception is being thrown,
             Pod is bound to a Node and Pod is running
             """
-            print('here')
             print('exception' + str(e))
             return False
 
@@ -246,7 +243,7 @@ class Scheduler:
         except Exception as e:
             return int(str(e)[1:4])
 
-        return response[1]
+        return int(response[1])
 
 
 def main():
