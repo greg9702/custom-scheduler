@@ -1,0 +1,78 @@
+# deployment 1:
+#   requests: 300
+#   usage: ~40
+#
+# deployment 2:
+#   requests: -
+#   usage: 1000
+#
+# deployment 3:
+#   requests: -
+#   usage: 500
+#
+#
+# deployment 3 x2
+# deployment 1 x6
+# deployment 2 x1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo3
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: foo3
+  template:
+    metadata:
+      labels:
+        app: foo3
+    spec:
+#      schedulerName: my_scheduler
+      containers:
+      - name: foo3
+        image: load:500m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo1
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: foo1
+  template:
+    metadata:
+      labels:
+        app: foo1
+    spec:
+#      schedulerName: my_scheduler
+      containers:
+      - name: foo1
+        image: load:300m
+        resources:
+          requests:
+            memory: "300Mi"
+          limits:
+            memory: "500M"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo2
+  template:
+    metadata:
+      labels:
+        app: foo2
+    spec:
+#      schedulerName: my_scheduler
+      containers:
+      - name: foo2
+        image: load:1g
+        imagePullPolicy: Never

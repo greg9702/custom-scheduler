@@ -1,3 +1,3 @@
 #!/bin/bash
 
-stress --vm-bytes 2g --vm-keep -m 1
+stress --vm-bytes 300m --vm-keep -m 1

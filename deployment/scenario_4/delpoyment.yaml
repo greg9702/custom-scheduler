@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: foo1
+  template:
+    metadata:
+      labels:
+        app: foo1
+    spec:
+      # schedulerName: my_scheduler
+      containers:
+      - name: foo1
+        image: paulbouwer/hello-kubernetes:1.5
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "200Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo2
+  template:
+    metadata:
+      labels:
+        app: foo2
+    spec:
+      # schedulerName: my_scheduler
+      containers:
+      - name: foo2
+        image: load:500m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo3
+  template:
+    metadata:
+      labels:
+        app: foo3
+    spec:
+      # schedulerName: my_scheduler
+      containers:
+      - name: foo3
+        image: load:500m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo4
+  template:
+    metadata:
+      labels:
+        app: foo4
+    spec:
+      # schedulerName: my_scheduler
+      containers:
+      - name: foo4
+        image: load:300m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo5
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo5
+  template:
+    metadata:
+      labels:
+        app: foo5
+    spec:
+      # schedulerName: my_scheduler
+      containers:
+      - name: foo5
+        image: load:300m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo6
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo6
+  template:
+    metadata:
+      labels:
+        app: foo6
+    spec:
+      # schedulerName: my_scheduler
+      containers:
+      - name: foo6
+        image: load:300m
