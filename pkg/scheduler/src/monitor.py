@@ -16,7 +16,7 @@ NUMBER_OF_RETRIES = 7
 
 class ClusterMonitor:
     """
-    Build full view of cluster, periodically update
+    Create full view of cluster, periodically update
     info about Pods runtime resources usage, use this
     as statistics, to use average value instead of
     instantaneous value
@@ -182,15 +182,3 @@ class ClusterMonitor:
         :return:
         """
         pass
-
-
-if __name__ == '__main__':
-    print('Running')
-    monitor = ClusterMonitor()
-
-    p1 = Thread(target=monitor.monitor_runner)
-    p2 = Thread(target=monitor.read_async)
-
-    p1.start()
-
-    p1.join()

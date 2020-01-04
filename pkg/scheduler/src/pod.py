@@ -6,7 +6,7 @@ import settings
 
 
 class SchedulingPriority(Enum):
-    NONE = 0
+    MIXED = 0
     MEMORY = 1
     CPU = 2
 
@@ -105,8 +105,6 @@ class Pod(object):
                         break
 
                 if found:
-                    #print('[REQUESTS]', container['name'], tmp_cont.resources.requests)
-
                     # there can be only one param specified in requests
                     # TODO cpu units m and n
 
@@ -123,8 +121,6 @@ class Pod(object):
                             tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
 
                 else:
-                    #print('[USAGE]', container['name'], '{ \'cpu:\'', container['usage']['cpu'],
-                    #     ', \'memory\'', container['usage']['memory'], '}')
                     if container['usage']['memory'] != '0':
                         tmp_mem += self.parse_usage_data(container['usage']['memory'], DataType.MEMORY)
                     if container['usage']['cpu'] != '0':
@@ -133,7 +129,6 @@ class Pod(object):
         if len(self.usage) > settings.LIMIT_OF_RECORDS:
             self.usage.pop(0)
 
-        #print({'cpu': tmp_cpu, 'memory': tmp_mem})
         self.usage.append({'cpu': tmp_cpu, 'memory': tmp_mem})
 
         return 0
