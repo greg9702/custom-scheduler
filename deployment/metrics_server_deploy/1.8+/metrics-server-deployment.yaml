@@ -33,6 +33,7 @@ spec:
         imagePullPolicy: Always
         command:
           - /metrics-server
+          - --metric-resolution=1s
           - --kubelet-preferred-address-types=InternalIP
           - --kubelet-insecure-tls
         volumeMounts:
